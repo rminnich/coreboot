@@ -74,6 +74,12 @@ static inline void console_time_report(void) {}
 int do_printk(int msg_level, const char *fmt, ...)
 	__attribute__((format(printf, 2, 3)));
 
+/* for the poor man's ftrace. */
+void __print_func_entry(const char *func, const char *file);
+void __print_func_exit(const char *func, const char *file);
+#define print_func_entry() __print_func_entry(__func__, __FILE__)
+#define print_func_exit() __print_func_exit(__func__, __FILE__)
+
 int do_vprintk(int msg_level, const char *fmt, va_list args);
 
 #endif /* CONSOLE_CONSOLE_H_ */

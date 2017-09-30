@@ -169,6 +169,7 @@ void smi_handler(u32 smm_revision)
 				       SMM_EM64T101_ARCH_OFFSET, node);
 		break;
 	case 0x00030064:
+	case 0x00020064:
 		state_save.type = AMD64;
 		state_save.amd64_state_save =
 			smm_save_state(smm_base,

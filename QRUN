@@ -1,0 +1,8 @@
+qemu-system-x86_64 \
+	-machine q35 \
+	-bios build/coreboot.rom \
+	-serial stdio \
+
+
+exit 0
+

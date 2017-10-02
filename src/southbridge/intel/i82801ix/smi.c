@@ -364,7 +364,10 @@ void smm_init(void)
 
 void smm_init_completion(void)
 {
-	printk(BIOS_SPEW, "------------------> NOT DOING SMM_INIT_COMPLETION\n");
+	if (1) {
+		printk(BIOS_SPEW, "------------------> NOT DOING SMM_INIT_COMPLETION\n");
+		return;
+	}
 	restore_default_smm_area(default_smm_area);
 }
 

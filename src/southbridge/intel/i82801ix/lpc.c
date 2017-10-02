@@ -465,7 +465,9 @@ static void lpc_init(struct device *dev)
 	i8259_configure_irq_trigger(9, 1);
 
 #if IS_ENABLED(CONFIG_HAVE_SMI_HANDLER)
-	i82801ix_lock_smm(dev);
+	printk(BIOS_SPEW, "NO LOCKING i82801 SMM DEV\n");
+	if (0)
+		i82801ix_lock_smm(dev);
 #endif
 }
 
@@ -549,7 +551,9 @@ static void southbridge_inject_dsdt(device_t dev)
 		memcpy(gnvs->did, gfx->did, sizeof(gnvs->did));
 
 		/* And tell SMI about it */
-		smm_setup_structures(gnvs, NULL, NULL);
+		printk(BIOS_SPEW, "NOT CALLING SMM SETUP STRUCTURES\n");
+		if (0)
+			smm_setup_structures(gnvs, NULL, NULL);
 
 		/* Add it to SSDT.  */
 		acpigen_write_scope("\\");

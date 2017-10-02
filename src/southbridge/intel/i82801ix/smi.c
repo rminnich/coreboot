@@ -310,8 +310,9 @@ static void smm_relocate(void)
 	 */
 
 	/* raise an SMI interrupt */
-	printk(BIOS_SPEW, "  ... raise SMI#\n");
+	printk(BIOS_SPEW, "  ... raise SMI#    ... \n");
 	outb(0x00, 0xb2);
+	printk(BIOS_SPEW, "  DONE! raise SMI#\n");
 }
 
 static int smm_handler_copied = 0;
@@ -347,6 +348,10 @@ static void smm_install(void)
 
 void smm_init(void)
 {
+	if (0) {
+		printk(BIOS_SPEW, "------------------> NOT DOING SMM_INIT\n");
+		return;
+	}
 	/* Put SMM code to 0xa0000 */
 	smm_install();
 
@@ -359,6 +364,7 @@ void smm_init(void)
 
 void smm_init_completion(void)
 {
+	printk(BIOS_SPEW, "------------------> NOT DOING SMM_INIT_COMPLETION\n");
 	restore_default_smm_area(default_smm_area);
 }
 
@@ -368,7 +374,10 @@ void smm_lock(void)
 	 * After running this function, only a full reset can
 	 * make the SMM registers writable again.
 	 */
-	printk(BIOS_DEBUG, "Locking SMM.\n");
+	if (1) {
+		printk(BIOS_DEBUG, "-------------> NOT Locking SMM.\n");
+		return;
+	}
 	pci_write_config8(dev_find_slot(0, PCI_DEVFN(0, 0)), SMRAM,
 			D_LCK | G_SMRAME | C_BASE_SEG);
 }

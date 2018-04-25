@@ -125,8 +125,13 @@ static int load_nonrelocatable_ramstage(struct prog *ramstage)
 
 void run_ramstage(void)
 {
+	// We use one or the other.
 	struct prog ramstage =
 		PROG_INIT(PROG_RAMSTAGE, CONFIG_CBFS_PREFIX "/ramstage");
+#if IS_ENABLED(CONFIG_RAMPAYLOAD)
+	struct prog rampayload =
+		PROG_INIT(PROG_PAYLOAD, CONFIG_CBFS_PREFIX "/rampayload");
+#endif
 
 	timestamp_add_now(TS_END_ROMSTAGE);
 
@@ -138,6 +143,17 @@ void run_ramstage(void)
 	    !IS_ENABLED(CONFIG_NO_STAGE_CACHE) &&
 	    IS_ENABLED(CONFIG_EARLY_CBMEM_INIT))
 		run_ramstage_from_resume(&ramstage);
+
+#if IS_ENABLED(CONFIG_RAMPAYLOAD)
+	if (prog_locate(&rampayload) == 0) {
+		void *e;
+		timestamp_add_now(TS_START_COPYRAM);
+		e = selfload(&rampayload, 1);
+		printk(BIOS_EMERG, "\tentry %p\n", e);
+		timestamp_add_now(TS_END_COPYRAM);
+		prog_run(&ramstage);
+	}
+#endif
 
 	if (prog_locate(&ramstage))
 		goto fail;

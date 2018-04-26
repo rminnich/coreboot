@@ -151,6 +151,12 @@ void run_ramstage(void)
 		e = selfload(&rampayload, 1);
 		printk(BIOS_EMERG, "\tentry %p\n", e);
 		timestamp_add_now(TS_END_COPYRAM);
+		// Temporary hack for debug so you can gdb qemu.
+		// remove this once it works.
+		uint8_t *p = e;
+		p[-1] = 0xfe;
+		p[-2] = 0xeb;
+		ramstage.entry = e - 2;
 		prog_run(&ramstage);
 	}
 #endif

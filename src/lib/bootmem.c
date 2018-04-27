@@ -77,7 +77,7 @@ void bootmem_write_memory_table(struct lb_memory *mem)
 		lb_r->type = range_entry_tag(r);
 
 		lb_r++;
-		mem->size += sizeof(struct lb_memory_range);
+		mem->size += sizeof(*lb_r);
 	}
 }
 

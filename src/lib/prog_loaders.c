@@ -147,6 +147,7 @@ void run_ramstage(void)
 #if IS_ENABLED(CONFIG_RAMPAYLOAD)
 	if (prog_locate(&rampayload) == 0) {
 		void *e;
+		void write_tables(void);
 		timestamp_add_now(TS_START_COPYRAM);
 		e = selfload(&rampayload, 1);
 		printk(BIOS_EMERG, "\tentry %p\n", e);
@@ -157,6 +158,7 @@ void run_ramstage(void)
 		p[-1] = 0xfe;
 		p[-2] = 0xeb;
 		ramstage.entry = e - 2;
+		write_tables();
 		prog_run(&ramstage);
 	}
 #endif

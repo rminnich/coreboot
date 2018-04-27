@@ -99,6 +99,7 @@ endif
 
 romstage-$(CONFIG_GENERIC_UDELAY) += timer.c
 romstage-$(CONFIG_RAMPAYLOAD) += romselfboot.c
+romstage-$(CONFIG_RAMPAYLOAD) += rom_table.c
 
 ramstage-y += prog_loaders.c
 ramstage-y += prog_ops.c

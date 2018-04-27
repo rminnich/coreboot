@@ -194,6 +194,7 @@ static int load_self_segments(struct segment *head, int nseg,
 			      bool check_regions)
 {
 	struct segment *ptr;
+	int i;
 
 	if (check_regions) {
 		if (!payload_targets_usable_ram(head))
@@ -223,9 +224,10 @@ static int load_self_segments(struct segment *head, int nseg,
 		return 0;
 	}
 #endif
-	for (ptr = head->next; ptr != head; ptr = ptr->next) {
+	for (i = 0; i < nseg; i++) {
 		unsigned char *dest, *src, *middle, *end;
 		size_t len, memsz;
+		ptr = &head[i];
 		printk(BIOS_DEBUG,
 			"Loading Segment: addr: 0x%016lx memsz: 0x%016lx filesz: 0x%016lx\n",
 			ptr->s_dstaddr, ptr->s_memsz, ptr->s_filesz);
@@ -260,6 +262,7 @@ static int load_self_segments(struct segment *head, int nseg,
 		case CBFS_COMPRESS_NONE: {
 			printk(BIOS_DEBUG, "it's not compressed!\n");
 			memcpy(dest, src, len);
+			hexdump(dest, 32);
 			break;
 		}
 		default:

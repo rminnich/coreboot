@@ -17,5 +17,10 @@
 #define COREINFO_H_
 
 #include <libpayload.h>
+#include <cbfs.h>
 #include <config.h>
+
+int verify_self(u8 *ptr);
+int self_get_params(u8 *fptr, u8 **params);
+int self_load_and_run(void *v, int *ret);
 #endif

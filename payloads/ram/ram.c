@@ -17,8 +17,18 @@
 
 int main(void)
 {
-	while (1)
-		outb('0', 0x3f8);
+	printf("Morning\n");
+	struct cbfs_file *f;
+
+#if IS_ENABLED(CONFIG_RAMPAYLOAD_ACPI)
+	// ACPI table loading goes here
+#endif
+
+	f = cbfs_find("fallback/linux");
+	if (!f)
+		die("cbfs_find failed");
+
+	die("FOUND");
 	return 0;
 }
 

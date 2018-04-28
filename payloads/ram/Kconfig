@@ -48,3 +48,12 @@ config PAYLOAD_INFO_VERSION
 
 endmenu
 
+menu "Modules"
+
+config MODULE_ACPI
+	bool "Generate ACPI tables"
+	default y
+	help
+	  This option enables ACPI table generation
+
+endmenu

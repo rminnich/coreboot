@@ -183,6 +183,7 @@ static boot_state_t bs_write_tables(void *arg)
 	/* Now that we have collected all of our information
 	 * write our configuration tables.
 	 */
+	if (false)
 	write_tables();
 
 	timestamp_add_now(TS_FINALIZE_CHIPS);

@@ -1,0 +1,2 @@
+config BOARD_EMULATION_QEMU_X86_X
+	bool "QEMU x86 x"

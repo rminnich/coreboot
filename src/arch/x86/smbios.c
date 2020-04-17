@@ -1164,9 +1164,10 @@ unsigned long smbios_write_tables(unsigned long current)
 	int max_struct_size = 0;
 	int handle = 0;
 
-	current = ALIGN_UP(current, 16);
-	printk(BIOS_DEBUG, "%s: %08lx\n", __func__, current);
+	printk(BIOS_DEBUG, "FUCK NO %s: %08lx\n", __func__, current);
+	return current;
 
+	current = ALIGN_UP(current, 16);
 	se = (struct smbios_entry *)current;
 	current += sizeof(struct smbios_entry);
 	current = ALIGN_UP(current, 16);

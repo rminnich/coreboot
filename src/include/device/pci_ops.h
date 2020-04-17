@@ -9,7 +9,7 @@
 #include <device/pci_type.h>
 #include <arch/pci_ops.h>
 
-void __noreturn pcidev_die(void);
+void pcidev_die(void);
 
 static __always_inline pci_devfn_t pcidev_bdf(const struct device *dev)
 {

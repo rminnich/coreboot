@@ -37,6 +37,7 @@ unsigned long qemu_get_memory_size(void)
 	outb(LOW_RAM_ADDR, CMOS_ADDR_PORT);
 	tomk |= ((unsigned long) inb(CMOS_DATA_PORT)) << 6;
 	tomk += 16 * 1024;
+	tomk = 2048 * 1024;
 	return tomk;
 }
 

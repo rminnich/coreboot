@@ -75,7 +75,7 @@ u16 pci_s_find_capability(pci_devfn_t dev, u16 cap)
 	return pci_s_find_next_capability(dev, cap, 0);
 }
 
-void __noreturn pcidev_die(void)
+void pcidev_die(void)
 {
-	die("PCI: dev is NULL!\n");
+	printk(BIOS_ERR, "PCI: dev is NULL!\n");
 }

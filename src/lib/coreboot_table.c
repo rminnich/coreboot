@@ -568,7 +568,7 @@ void *write_tables(void)
 	size_t cbtable_size;
 	const size_t max_table_size = COREBOOT_TABLE_SIZE;
 
-	cbtable_start = (uintptr_t)cbmem_add(CBMEM_ID_CBTABLE, max_table_size);
+	cbtable_end = cbtable_start = (uintptr_t)cbmem_add(CBMEM_ID_CBTABLE, max_table_size);
 
 	if (!cbtable_start) {
 		printk(BIOS_ERR, "Could not add CBMEM for coreboot table.\n");
@@ -576,12 +576,13 @@ void *write_tables(void)
 	}
 
 	/* Add architecture specific tables. */
+	if (0) {
 	arch_write_tables(cbtable_start);
 
 	/* Write the coreboot table. */
 	cbtable_end = write_coreboot_table(cbtable_start);
+	}
 	cbtable_size = cbtable_end - cbtable_start;
-
 	if (cbtable_size > max_table_size) {
 		printk(BIOS_ERR, "%s: coreboot table didn't fit (%zx/%zx)\n",
 			__func__, cbtable_size, max_table_size);

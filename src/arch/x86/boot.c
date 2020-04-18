@@ -11,8 +11,8 @@ int payload_arch_usable_ram_quirk(uint64_t start, uint64_t size)
 {
 	if (start < 1 * MiB && (start + size) <= 1 * MiB) {
 		printk(BIOS_DEBUG,
-			"Payload being loaded at below 1MiB without region being marked as RAM usable.\n");
-		return 1;
+			"Payload being loaded at below 1MiB (0x%llx - 0x%llx) without region being marked as RAM usable.\n", start, size);
+		return 0;
 	}
 
 	return 0;

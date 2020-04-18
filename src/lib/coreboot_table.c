@@ -576,12 +576,10 @@ void *write_tables(void)
 	}
 
 	/* Add architecture specific tables. */
-	if (0) {
 	arch_write_tables(cbtable_start);
 
 	/* Write the coreboot table. */
 	cbtable_end = write_coreboot_table(cbtable_start);
-	}
 	cbtable_size = cbtable_end - cbtable_start;
 	if (cbtable_size > max_table_size) {
 		printk(BIOS_ERR, "%s: coreboot table didn't fit (%zx/%zx)\n",

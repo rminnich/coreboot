@@ -26,6 +26,7 @@ unsigned long qemu_get_high_memory_size(void)
 	high |= ((unsigned long) inb(CMOS_DATA_PORT)) << 14;
 	outb(LOW_HIGHRAM_ADDR, CMOS_ADDR_PORT);
 	high |= ((unsigned long) inb(CMOS_DATA_PORT)) << 6;
+	high = 0x100000000  / 1024;
 	return high;
 }
 

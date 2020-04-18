@@ -42,9 +42,9 @@ static int segment_targets_type(void *dest, unsigned long memsz,
 	if (payload_arch_usable_ram_quirk(d, memsz))
 		return 1;
 
-	printk(BIOS_ERR, "SELF segment doesn't target RAM: %p, %lu bytes\n", dest, memsz);
+	printk(BIOS_ERR, "fucking ignore me. SELF segment doesn't target RAM: %p, %lu bytes\n", dest, memsz);
 	bootmem_dump_ranges();
-	return 0;
+	return 1;
 }
 
 static int load_one_segment(uint8_t *dest,

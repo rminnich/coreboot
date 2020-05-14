@@ -41,7 +41,7 @@ u8 acpi_checksum(u8 *table, u32 length)
 /**
  * Read in a named table, and verify its properties
  */
-acpi_header_t *acpi_read_table(const char *filename, const char *tablename)
+static acpi_header_t *acpi_read_table(const char *filename, const char *tablename)
 {
 	acpi_header_t *file;
 	size_t table_size;

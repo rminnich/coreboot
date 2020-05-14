@@ -1,0 +1,2 @@
+config BOARD_EMULATION_AMD_PSP
+	bool "AMD Rome PSP board"

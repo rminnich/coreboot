@@ -67,15 +67,24 @@ static const struct pci_driver nb_driver __pci_driver = {
 	.device = 0x1480,
 };
 
-/*************************************************
- * enable the dedicated function in thatcher board.
- *************************************************/
+static void mainboard_amd_romepsp_enable(struct device *dev)
+{
+	print_func_entry();
+	printk(BIOS_INFO, "Mainboard " CONFIG_MAINBOARD_PART_NUMBER " Enable.\n");
+	print_func_exit();
+}
+
+struct chip_operations mainboard_amd_romepsp_ops = {
+	.enable_dev = mainboard_amd_romepsp_enable,
+};
+
 static void mainboard_enable(struct device *dev)
 {
 	print_func_entry();
 	printk(BIOS_INFO, "Mainboard " CONFIG_MAINBOARD_PART_NUMBER " Enable.\n");
 	print_func_exit();
 }
+
 
 struct chip_operations mainboard_ops = {
 	.enable_dev = mainboard_enable,

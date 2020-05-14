@@ -8,16 +8,21 @@
 
 static void pcix_tune_dev(struct device *dev)
 {
+	print_func_entry();
 	u32 status;
 	u16 orig_cmd, cmd;
 	unsigned int cap, max_read, max_tran;
 
-	if (dev->hdr_type != PCI_HEADER_TYPE_NORMAL)
+	if (dev->hdr_type != PCI_HEADER_TYPE_NORMAL) {
+		print_func_exit();
 		return;
+	}
 
 	cap = pci_find_capability(dev, PCI_CAP_ID_PCIX);
-	if (!cap)
+	if (!cap) {
+		print_func_exit();
 		return;
+	}
 
 	printk(BIOS_DEBUG, "%s PCI-X tuning\n", dev_path(dev));
 
@@ -43,18 +48,22 @@ static void pcix_tune_dev(struct device *dev)
 
 	if (orig_cmd != cmd)
 		pci_write_config16(dev, cap + PCI_X_CMD, cmd);
+	print_func_exit();
 }
 
 static void pcix_tune_bus(struct bus *bus)
 {
+	print_func_entry();
 	struct device *child;
 
 	for (child = bus->children; child; child = child->sibling)
 		pcix_tune_dev(child);
+	print_func_exit();
 }
 
 const char *pcix_speed(u16 sstatus)
 {
+	print_func_entry();
 	static const char conventional[] = "Conventional PCI";
 	static const char pcix_66mhz[] = "66MHz PCI-X";
 	static const char pcix_100mhz[] = "100MHz PCI-X";
@@ -91,11 +100,13 @@ const char *pcix_speed(u16 sstatus)
 		break;
 	}
 
+	print_func_exit();
 	return result;
 }
 
 void pcix_scan_bridge(struct device *dev)
 {
+	print_func_entry();
 	unsigned int pos;
 	u16 sstatus;
 
@@ -111,6 +122,7 @@ void pcix_scan_bridge(struct device *dev)
 	/* Print the PCI-X bus speed. */
 	printk(BIOS_DEBUG, "PCI: %02x: %s\n", dev->link_list->secondary,
 	       pcix_speed(sstatus));
+	print_func_exit();
 }
 
 /** Default device operations for PCI-X bridges */

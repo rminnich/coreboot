@@ -39,6 +39,37 @@ u8 acpi_checksum(u8 *table, u32 length)
 }
 
 /**
+ * Read in a named table, and verify its properties
+ */
+acpi_header_t *acpi_read_table(const char *filename, const char *tablename)
+{
+	acpi_header_t *file;
+	size_t table_size;
+
+	file = cbfs_boot_map_with_leak(filename, CBFS_TYPE_RAW, &table_size);
+	if (!file) {
+		printk(BIOS_ERR, "No %s file for table %s\n", filename, tablename);
+		return NULL;
+	}
+	if (file->length > table_size) {
+		printk(BIOS_ERR, "Invalid %s file: file length(%d) > table_size(%ld)\n",
+		       filename, file->length, table_size);
+		return NULL;
+	}
+	if (file->length < sizeof(acpi_header_t)) {
+		printk(BIOS_ERR, "Invalid %s file: file length(%d) < table_size(%ld)\n",
+		       filename, file->length, table_size);
+		return NULL;
+	}
+	if (memcmp(file->signature, tablename, 4) != 0) {
+		printk(BIOS_ERR, "Invalid %s file, signature(%s) does not match %s\n",
+		       filename, file->signature, tablename);
+		return NULL;
+	}
+	return file;
+}
+
+/**
  * Add an ACPI table to the RSDT (and XSDT) structure, recalculate length
  * and checksum.
  */
@@ -231,9 +262,16 @@ __weak uintptr_t cpu_get_lapic_addr(void)
 
 void acpi_create_madt(acpi_madt_t *madt)
 {
-	acpi_header_t *header = &(madt->header);
+	acpi_header_t *header, *file;
 	unsigned long current = (unsigned long)madt + sizeof(acpi_madt_t);
 
+	file = acpi_read_table(CONFIG_CBFS_PREFIX "/madt.aml", "APIC");
+	if (file) {
+		memmove(madt, file, file->length);
+		return;
+	}
+
+	header = &(madt->header);
 	memset((void *)madt, 0, sizeof(acpi_madt_t));
 
 	if (!header)

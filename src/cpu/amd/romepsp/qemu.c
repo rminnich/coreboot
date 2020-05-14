@@ -23,6 +23,6 @@ static const struct cpu_driver driver __cpu_driver = {
 	.id_table = cpu_table,
 };
 
-struct chip_operations cpu_romepsp_x86_ops = {
+struct chip_operations cpu_amd_romepsp_ops = {
 	CHIP_NAME("AMD PSP x86 CPU")
 };

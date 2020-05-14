@@ -6,20 +6,14 @@
 #include <southbridge/intel/i82801ix/i82801ix.h>
 #include <device/pci_ops.h>
 
-#define D0F0_PCIEXBAR_LO 0x60
-
 static void mainboard_machine_check(void)
 {
-	/* Check that MCFG is active. If it's not qemu was started for machine PC */
-	if (!CONFIG(BOOTBLOCK_CONSOLE) &&
-	    (pci_read_config32(PCI_DEV(0, 0, 0), D0F0_PCIEXBAR_LO) !=
-	     (CONFIG_MMCONF_BASE_ADDRESS | 1)))
-		die("You must run qemu for machine Q35 (-M q35)");
+	printk(BIOS_SPEW, "%s\n", __func__);
 }
 
 void mainboard_romstage_entry(void)
 {
-	//i82801ix_early_init();
+	printk(BIOS_SPEW, "%s\n", __func__);
 
 	mainboard_machine_check();
 

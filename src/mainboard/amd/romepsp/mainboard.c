@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
+#include <console/console.h>
 #include <device/device.h>
 #include <device/pci.h>
 #include <device/pci_ops.h>
@@ -14,6 +15,7 @@ static const unsigned char qemu_q35_irqs[] = {
 
 static void qemu_nb_init(struct device *dev)
 {
+	print_func_entry();
 	/* Map memory at 0xc0000 - 0xfffff */
 	int i;
 	uint8_t v = pci_read_config8(dev, Q35_PAM0);
@@ -37,15 +39,18 @@ static void qemu_nb_init(struct device *dev)
 	/* setup IRQ routing southbridge devices */
 	for (i = 25; i < 32; i++)
 		pci_assign_irqs(pcidev_on_root(i, 0), qemu_q35_irqs);
+	print_func_exit();
 }
 
 static void qemu_nb_read_resources(struct device *dev)
 {
+	print_func_entry();
 	pci_dev_read_resources(dev);
 
 	/* reserve mmconfig */
 	fixed_mem_resource(dev, 2, CONFIG_MMCONF_BASE_ADDRESS >> 10, 0x10000000 >> 10,
 			   IORESOURCE_RESERVE);
+	print_func_exit();
 }
 
 
@@ -58,6 +63,20 @@ static struct device_operations nb_operations = {
 
 static const struct pci_driver nb_driver __pci_driver = {
 	.ops = &nb_operations,
-	.vendor = 0x8086,
-	.device = 0x29c0,
+	.vendor = 0x1022,
+	.device = 0x1480,
+};
+
+/*************************************************
+ * enable the dedicated function in thatcher board.
+ *************************************************/
+static void mainboard_enable(struct device *dev)
+{
+	print_func_entry();
+	printk(BIOS_INFO, "Mainboard " CONFIG_MAINBOARD_PART_NUMBER " Enable.\n");
+	print_func_exit();
+}
+
+struct chip_operations mainboard_ops = {
+	.enable_dev = mainboard_enable,
 };

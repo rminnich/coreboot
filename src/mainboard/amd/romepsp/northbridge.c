@@ -25,6 +25,7 @@ static void qemu_reserve_ports(struct device *dev, unsigned int idx,
 			       unsigned int base, unsigned int size,
 			       const char *name)
 {
+	print_func_entry();
 	unsigned int end = base + size - 1;
 	struct resource *res;
 
@@ -36,15 +37,19 @@ static void qemu_reserve_ports(struct device *dev, unsigned int idx,
 	res->limit = 0xffff;
 	res->flags = IORESOURCE_IO | IORESOURCE_FIXED | IORESOURCE_STORED |
 		IORESOURCE_ASSIGNED;
+	print_func_exit();
 }
 
 static void cpu_pci_domain_set_resources(struct device *dev)
 {
+	print_func_entry();
 	assign_resources(dev->link_list);
+	print_func_exit();
 }
 
 static void cpu_pci_domain_read_resources(struct device *dev)
 {
+	print_func_entry();
 	u16 nbid   = pci_read_config16(pcidev_on_root(0x0, 0), PCI_DEVICE_ID);
 	int i440fx = (nbid == 0x1237);
 	int q35    = (nbid == 0x29c0);
@@ -161,11 +166,13 @@ static void cpu_pci_domain_read_resources(struct device *dev)
 	res->limit = 0xffffffffUL;
 	res->flags = IORESOURCE_MEM | IORESOURCE_FIXED | IORESOURCE_STORED |
 		     IORESOURCE_ASSIGNED;
+	print_func_exit();
 }
 
 #if CONFIG(GENERATE_SMBIOS_TABLES)
 static int qemu_get_smbios_data16(int handle, unsigned long *current)
 {
+	print_func_entry();
 	struct smbios_type16 *t = (struct smbios_type16 *)*current;
 	int len = sizeof(struct smbios_type16);
 
@@ -178,11 +185,13 @@ static int qemu_get_smbios_data16(int handle, unsigned long *current)
 	t->memory_error_correction = MEMORY_ARRAY_ECC_NONE;
 	t->maximum_capacity = qemu_get_memory_size();
 	*current += len;
+	print_func_exit();
 	return len;
 }
 
 static int qemu_get_smbios_data17(int handle, int parent_handle, unsigned long *current)
 {
+	print_func_entry();
 	struct smbios_type17 *t = (struct smbios_type17 *)*current;
 	int len;
 
@@ -203,20 +212,25 @@ static int qemu_get_smbios_data17(int handle, int parent_handle, unsigned long *
 	t->manufacturer = smbios_add_string(t->eos, CONFIG_MAINBOARD_VENDOR);
 	len = t->length + smbios_string_table_len(t->eos);
 	*current += len;
+	print_func_exit();
 	return len;
 }
 
 static int qemu_get_smbios_data(struct device *dev, int *handle, unsigned long *current)
 {
+	print_func_entry();
 	int len;
 
 	len = fw_cfg_smbios_tables(handle, current);
-	if (len != 0)
+	if (len != 0) {
+		print_func_exit();
 		return len;
+	}
 
 	len = qemu_get_smbios_data16(*handle, current);
 	len += qemu_get_smbios_data17(*handle+1, *handle, current);
 	*handle += 2;
+	print_func_exit();
 	return len;
 }
 #endif
@@ -224,12 +238,18 @@ static int qemu_get_smbios_data(struct device *dev, int *handle, unsigned long *
 #if CONFIG(HAVE_ACPI_TABLES)
 static const char *qemu_acpi_name(const struct device *dev)
 {
-	if (dev->path.type == DEVICE_PATH_DOMAIN)
+	print_func_entry();
+	if (dev->path.type == DEVICE_PATH_DOMAIN) {
+		print_func_exit();
 		return "PCI0";
+	}
 
-	if (dev->path.type != DEVICE_PATH_PCI || dev->bus->secondary != 0)
+	if (dev->path.type != DEVICE_PATH_PCI || dev->bus->secondary != 0) {
+		print_func_exit();
 		return NULL;
+	}
 
+	print_func_exit();
 	return NULL;
 }
 #endif
@@ -248,17 +268,22 @@ static struct device_operations pci_domain_ops = {
 
 static void cpu_bus_init(struct device *dev)
 {
+	print_func_entry();
 	initialize_cpus(dev->link_list);
+	print_func_exit();
 }
 
 static void cpu_bus_scan(struct device *bus)
 {
+	print_func_entry();
 	int max_cpus = fw_cfg_max_cpus();
 	struct device *cpu;
 	int i;
 
-	if (max_cpus < 0)
+	if (max_cpus < 0) {
+		print_func_exit();
 		return;
+	}
 
 	/*
 	 * TODO: This only handles the simple "qemu -smp $nr" case
@@ -271,6 +296,7 @@ static void cpu_bus_scan(struct device *bus)
 		if (cpu)
 			set_cpu_topology(cpu, 1, 0, i, 0);
 	}
+	print_func_exit();
 }
 
 static struct device_operations cpu_bus_ops = {
@@ -282,12 +308,14 @@ static struct device_operations cpu_bus_ops = {
 
 static void northbridge_enable(struct device *dev)
 {
+	print_func_entry();
 	/* Set the operations if it is a special bus type */
 	if (dev->path.type == DEVICE_PATH_DOMAIN) {
 		dev->ops = &pci_domain_ops;
 	} else if (dev->path.type == DEVICE_PATH_CPU_CLUSTER) {
 		dev->ops = &cpu_bus_ops;
 	}
+	print_func_exit();
 }
 
 struct chip_operations mainboard_emulation_qemu_i440fx_ops = {
@@ -302,6 +330,8 @@ struct chip_operations mainboard_emulation_qemu_q35_ops = {
 
 void do_board_reset(void)
 {
+	print_func_entry();
 	die("reset");
+	print_func_exit();
 }
 

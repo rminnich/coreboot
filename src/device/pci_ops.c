@@ -20,13 +20,16 @@ u8 *const pci_mmconf = (void *)(uintptr_t)CONFIG_MMCONF_BASE_ADDRESS;
  */
 u16 pci_s_find_next_capability(pci_devfn_t dev, u16 cap, u16 last)
 {
+	print_func_entry();
 	u16 pos = 0;
 	u16 status;
 	int reps = 48;
 
 	status = pci_s_read_config16(dev, PCI_STATUS);
-	if (!(status & PCI_STATUS_CAP_LIST))
+	if (!(status & PCI_STATUS_CAP_LIST)) {
+		print_func_exit();
 		return 0;
+	}
 
 	u8 hdr_type = pci_s_read_config8(dev, PCI_HEADER_TYPE);
 	switch (hdr_type & 0x7f) {
@@ -38,6 +41,7 @@ u16 pci_s_find_next_capability(pci_devfn_t dev, u16 cap, u16 last)
 		pos = PCI_CB_CAPABILITY_LIST;
 		break;
 	default:
+		print_func_exit();
 		return 0;
 	}
 
@@ -50,14 +54,17 @@ u16 pci_s_find_next_capability(pci_devfn_t dev, u16 cap, u16 last)
 		if (this_cap == 0xff)
 			break;
 
-		if (!last && (this_cap == cap))
+		if (!last && (this_cap == cap)) {
+			print_func_exit();
 			return pos;
+		}
 
 		if (last == pos)
 			last = 0;
 
 		pos = pci_s_read_config8(dev, pos + PCI_CAP_LIST_NEXT);
 	}
+	print_func_exit();
 	return 0;
 }
 
@@ -71,10 +78,14 @@ u16 pci_s_find_next_capability(pci_devfn_t dev, u16 cap, u16 last)
  */
 u16 pci_s_find_capability(pci_devfn_t dev, u16 cap)
 {
+	print_func_entry();
+	print_func_exit();
 	return pci_s_find_next_capability(dev, cap, 0);
 }
 
 void __noreturn pcidev_die(void)
 {
+	print_func_entry();
 	die("PCI: dev is NULL!\n");
+	print_func_exit();
 }

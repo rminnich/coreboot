@@ -12,11 +12,16 @@
 #include <acpi/acpigen.h>
 
 /* Rmodules don't like weak symbols. */
-void __weak map_oprom_vendev_rev(u32 *vendev, u8 *rev) { return; }
-u32 __weak map_oprom_vendev(u32 vendev) { return vendev; }
+void __weak map_oprom_vendev_rev(u32 *vendev, u8 *rev) {
+	print_func_entry(); print_func_exit();
+	return; }
+u32 __weak map_oprom_vendev(u32 vendev) {
+	print_func_entry(); print_func_exit();
+	return vendev; }
 
 struct rom_header *pci_rom_probe(const struct device *dev)
 {
+	print_func_entry();
 	struct rom_header *rom_header = NULL;
 	struct pci_data *rom_data;
 	u8 rev = pci_read_config8(dev, PCI_REVISION_ID);
@@ -52,6 +57,7 @@ struct rom_header *pci_rom_probe(const struct device *dev)
 	} else if (!CONFIG(ON_DEVICE_ROM_LOAD)) {
 		printk(BIOS_DEBUG, "PCI Option ROM loading disabled for %s\n",
 		       dev_path(dev));
+		print_func_exit();
 		return NULL;
 	} else {
 		uintptr_t rom_address;
@@ -64,7 +70,10 @@ struct rom_header *pci_rom_probe(const struct device *dev)
 				rom_address = 0xc0000;
 			else
 #endif
-				return NULL;
+				{
+					print_func_exit();
+					return NULL;
+				}
 		} else {
 			/* Enable expansion ROM address decoding. */
 			pci_write_config32(dev, PCI_ROM_ADDRESS,
@@ -86,6 +95,7 @@ struct rom_header *pci_rom_probe(const struct device *dev)
 	if (le32_to_cpu(rom_header->signature) != PCI_ROM_HDR) {
 		printk(BIOS_ERR, "Incorrect expansion ROM header "
 		       "signature %04x\n", le32_to_cpu(rom_header->signature));
+		print_func_exit();
 		return NULL;
 	}
 
@@ -99,6 +109,7 @@ struct rom_header *pci_rom_probe(const struct device *dev)
 	    && (vendev == mapped_vendev)) {
 		printk(BIOS_ERR, "ID mismatch: vendor ID %04x, "
 		       "device ID %04x\n", dev->vendor, dev->device);
+		print_func_exit();
 		return NULL;
 	}
 
@@ -113,6 +124,7 @@ struct rom_header *pci_rom_probe(const struct device *dev)
 		// return NULL;
 	}
 
+	print_func_exit();
 	return rom_header;
 }
 
@@ -121,6 +133,7 @@ static void *pci_ram_image_start = (void *)PCI_RAM_IMAGE_START;
 struct rom_header *pci_rom_load(struct device *dev,
 				struct rom_header *rom_header)
 {
+	print_func_entry();
 	struct pci_data * rom_data;
 	unsigned int rom_size;
 	unsigned int image_size=0;
@@ -136,8 +149,10 @@ struct rom_header *pci_rom_load(struct device *dev,
 		image_size = le32_to_cpu(rom_data->ilen) * 512;
 	} while ((rom_data->type != 0) && (rom_data->indicator != 0)); // make sure we got x86 version
 
-	if (rom_data->type != 0)
+	if (rom_data->type != 0) {
+		print_func_exit();
 		return NULL;
+	}
 
 	rom_size = rom_header->size * 512;
 
@@ -149,7 +164,10 @@ struct rom_header *pci_rom_load(struct device *dev,
 	if ((dev->class >> 8) == PCI_CLASS_DISPLAY_VGA) {
 #if !CONFIG(MULTIPLE_VGA_ADAPTERS)
 		extern struct device *vga_pri; /* Primary VGA device (device.c). */
-		if (dev != vga_pri) return NULL; /* Only one VGA supported. */
+		if (dev != vga_pri) {
+			print_func_exit();
+			return NULL;
+		} /* Only one VGA supported. */
 #endif
 		if ((void *)PCI_VGA_RAM_IMAGE_START != rom_header) {
 			printk(BIOS_DEBUG, "Copying VGA ROM Image from %p to "
@@ -158,6 +176,7 @@ struct rom_header *pci_rom_load(struct device *dev,
 			memcpy((void *)PCI_VGA_RAM_IMAGE_START, rom_header,
 			       rom_size);
 		}
+		print_func_exit();
 		return (struct rom_header *) (PCI_VGA_RAM_IMAGE_START);
 	}
 
@@ -166,6 +185,7 @@ struct rom_header *pci_rom_load(struct device *dev,
 
 	memcpy(pci_ram_image_start, rom_header, rom_size);
 	pci_ram_image_start += rom_size;
+	print_func_exit();
 	return (struct rom_header *) (pci_ram_image_start-rom_size);
 }
 
@@ -175,31 +195,41 @@ struct rom_header *pci_rom_load(struct device *dev,
 /* VBIOS may be modified after oprom init so use the copy if present. */
 static struct rom_header *check_initialized(const struct device *dev)
 {
+	print_func_entry();
 	struct rom_header *run_rom;
 	struct pci_data *rom_data;
 
-	if (!CONFIG(VGA_ROM_RUN))
+	if (!CONFIG(VGA_ROM_RUN)) {
+		print_func_exit();
 		return NULL;
+	}
 
 	run_rom = (struct rom_header *)(uintptr_t)PCI_VGA_RAM_IMAGE_START;
-	if (read_le16(&run_rom->signature) != PCI_ROM_HDR)
+	if (read_le16(&run_rom->signature) != PCI_ROM_HDR) {
+		print_func_exit();
 		return NULL;
+	}
 
 	rom_data = (struct pci_data *)((u8 *)run_rom
 			+ read_le16(&run_rom->data));
 
 	if (read_le32(&rom_data->signature) == PCI_DATA_HDR
 			&& read_le16(&rom_data->device) == dev->device
-			&& read_le16(&rom_data->vendor) == dev->vendor)
+			&& read_le16(&rom_data->vendor) == dev->vendor) {
+		print_func_exit();
 		return run_rom;
-	else
+	}
+	else {
+		print_func_exit();
 		return NULL;
+	}
 }
 
 static unsigned long
 pci_rom_acpi_fill_vfct(const struct device *device, acpi_vfct_t *vfct_struct,
 		       unsigned long current)
 {
+	print_func_entry();
 	acpi_vfct_image_hdr_t *header = &vfct_struct->image_hdr;
 	struct rom_header *rom;
 
@@ -208,6 +238,7 @@ pci_rom_acpi_fill_vfct(const struct device *device, acpi_vfct_t *vfct_struct,
 		rom = pci_rom_probe(device);
 	if (!rom) {
 		printk(BIOS_ERR, "pci_rom_acpi_fill_vfct failed\n");
+		print_func_exit();
 		return current;
 	}
 
@@ -228,6 +259,7 @@ pci_rom_acpi_fill_vfct(const struct device *device, acpi_vfct_t *vfct_struct,
 	vfct_struct->VBIOSImageOffset = (size_t)header - (size_t)vfct_struct;
 
 	current += header->ImageLength;
+	print_func_exit();
 	return current;
 }
 
@@ -235,13 +267,18 @@ unsigned long
 pci_rom_write_acpi_tables(const struct device *device, unsigned long current,
 			  struct acpi_rsdp *rsdp)
 {
+	print_func_entry();
 	/* Only handle VGA devices */
-	if ((device->class >> 8) != PCI_CLASS_DISPLAY_VGA)
+	if ((device->class >> 8) != PCI_CLASS_DISPLAY_VGA) {
+		print_func_exit();
 		return current;
+	}
 
 	/* Only handle enabled devices */
-	if (!device->enabled)
+	if (!device->enabled) {
+		print_func_exit();
 		return current;
+	}
 
 	/* AMD/ATI uses VFCT */
 	if (device->vendor == PCI_VENDOR_ID_ATI) {
@@ -257,38 +294,47 @@ pci_rom_write_acpi_tables(const struct device *device, unsigned long current,
 		}
 	}
 
+	print_func_exit();
 	return current;
 }
 
 void pci_rom_ssdt(const struct device *device)
 {
+	print_func_entry();
 	static size_t ngfx;
 
 	/* Only handle VGA devices */
-	if ((device->class >> 8) != PCI_CLASS_DISPLAY_VGA)
+	if ((device->class >> 8) != PCI_CLASS_DISPLAY_VGA) {
+		print_func_exit();
 		return;
+	}
 
 	/* Only handle enabled devices */
-	if (!device->enabled)
+	if (!device->enabled) {
+		print_func_exit();
 		return;
+	}
 
 	/* Probe for option rom */
 	const struct rom_header *rom = pci_rom_probe(device);
 	if (!rom || !rom->size) {
 		printk(BIOS_WARNING, "%s: Missing PCI Option ROM\n",
 		       dev_path(device));
+		print_func_exit();
 		return;
 	}
 
 	const char *scope = acpi_device_path(device);
 	if (!scope) {
 		printk(BIOS_ERR, "%s: Missing ACPI scope\n", dev_path(device));
+		print_func_exit();
 		return;
 	}
 
 	/* Supports up to four devices. */
 	if ((CBMEM_ID_ROM0 + ngfx) > CBMEM_ID_ROM3) {
 		printk(BIOS_ERR, "%s: Out of CBMEM IDs.\n", dev_path(device));
+		print_func_exit();
 		return;
 	}
 
@@ -297,6 +343,7 @@ void pci_rom_ssdt(const struct device *device)
 	if (!cbrom_length) {
 		printk(BIOS_ERR, "%s: ROM has zero length!\n",
 		       dev_path(device));
+		print_func_exit();
 		return;
 	}
 
@@ -304,6 +351,7 @@ void pci_rom_ssdt(const struct device *device)
 	if (!cbrom) {
 		printk(BIOS_ERR, "%s: Failed to allocate CBMEM.\n",
 		       dev_path(device));
+		print_func_exit();
 		return;
 	}
 	/* Increment CBMEM id for next device */
@@ -315,5 +363,6 @@ void pci_rom_ssdt(const struct device *device)
 	acpigen_write_scope(scope);
 	acpigen_write_rom(cbrom, cbrom_length);
 	acpigen_pop_len(); /* pop scope */
+	print_func_exit();
 }
 #endif

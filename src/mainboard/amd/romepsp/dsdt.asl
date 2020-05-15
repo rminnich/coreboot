@@ -16,7 +16,7 @@ DefinitionBlock (
 	)
 {
 
-#include "acpi/dbug.asl"
+//#include "acpi/dbug.asl"
 
 	Scope(\_SB) {
 		OperationRegion(PCST, SystemIO, 0xae00, 0x0c)
@@ -94,8 +94,8 @@ DefinitionBlock (
 		}
 	}
 
-#include "acpi/pci-crs.asl"
-#include "acpi/hpet.asl"
+//#include "acpi/pci-crs.asl"
+//#include "acpi/hpet.asl"
 
 
 /****************************************************************
@@ -152,7 +152,7 @@ DefinitionBlock (
 		}
 	}
 
-#include "acpi/isa.asl"
+//#include "acpi/isa.asl"
 
 
 /****************************************************************

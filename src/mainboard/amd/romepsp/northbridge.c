@@ -15,10 +15,6 @@
 #include <smbios.h>
 #include "memory.h"
 
-#include "fw_cfg.h"
-#include "fw_cfg_if.h"
-
-
 #include "acpi.h"
 
 static void qemu_reserve_ports(struct device *dev, unsigned int idx,
@@ -56,47 +52,8 @@ static void cpu_pci_domain_read_resources(struct device *dev)
 	struct resource *res;
 	unsigned long tomk = 0, high;
 	int idx = 10;
-	FWCfgFile f;
 
 	pci_domain_read_resources(dev);
-
-	if (!fw_cfg_check_file(&f, "etc/e820") && f.size > 0) {
-		/* supported by qemu 1.7+ */
-		FwCfgE820Entry *list = malloc(f.size);
-		int i;
-		fw_cfg_get(f.select, list, f.size);
-		for (i = 0; i < f.size / sizeof(*list); i++) {
-			switch (list[i].type) {
-			case 1: /* RAM */
-				printk(BIOS_DEBUG, "QEMU: e820/ram: 0x%08llx + 0x%08llx\n",
-				       list[i].address, list[i].length);
-				if (list[i].address == 0) {
-					tomk = list[i].length / 1024;
-					ram_resource(dev, idx++, 0, 640);
-					ram_resource(dev, idx++, 768, tomk - 768);
-				} else {
-					ram_resource(dev, idx++,
-						     list[i].address / 1024,
-						     list[i].length / 1024);
-				}
-				break;
-			case 2: /* reserved */
-				printk(BIOS_DEBUG, "QEMU: e820/res: 0x%08llx +0x%08llx\n",
-				       list[i].address, list[i].length);
-				res = new_resource(dev, idx++);
-				res->base = list[i].address;
-				res->size = list[i].length;
-				res->limit = 0xffffffff;
-				res->flags = IORESOURCE_MEM | IORESOURCE_FIXED |
-					IORESOURCE_STORED | IORESOURCE_ASSIGNED;
-				break;
-			default:
-				/* skip unknown */
-				break;
-			}
-		}
-		free(list);
-	}
 
 	if (!tomk) {
 		/* qemu older than 1.7, or reading etc/e820 failed. Fallback to cmos. */
@@ -169,7 +126,7 @@ static void cpu_pci_domain_read_resources(struct device *dev)
 	print_func_exit();
 }
 
-#if CONFIG(GENERATE_SMBIOS_TABLES)
+#if 0 // CONFIG(GENERATE_SMBIOS_TABLES)
 static int qemu_get_smbios_data16(int handle, unsigned long *current)
 {
 	print_func_entry();
@@ -219,17 +176,13 @@ static int qemu_get_smbios_data17(int handle, int parent_handle, unsigned long *
 static int qemu_get_smbios_data(struct device *dev, int *handle, unsigned long *current)
 {
 	print_func_entry();
-	int len;
+	int len = -1;
 
-	len = fw_cfg_smbios_tables(handle, current);
 	if (len != 0) {
 		print_func_exit();
 		return len;
 	}
 
-	len = qemu_get_smbios_data16(*handle, current);
-	len += qemu_get_smbios_data17(*handle+1, *handle, current);
-	*handle += 2;
 	print_func_exit();
 	return len;
 }
@@ -258,7 +211,7 @@ static struct device_operations pci_domain_ops = {
 	.read_resources		= cpu_pci_domain_read_resources,
 	.set_resources		= cpu_pci_domain_set_resources,
 	.scan_bus		= pci_domain_scan_bus,
-#if CONFIG(GENERATE_SMBIOS_TABLES)
+#if 0 && CONFIG(GENERATE_SMBIOS_TABLES)
 	.get_smbios_data	= qemu_get_smbios_data,
 #endif
 #if CONFIG(HAVE_ACPI_TABLES)
@@ -276,7 +229,7 @@ static void cpu_bus_init(struct device *dev)
 static void cpu_bus_scan(struct device *bus)
 {
 	print_func_entry();
-	int max_cpus = fw_cfg_max_cpus();
+	int max_cpus = 256;
 	struct device *cpu;
 	int i;
 

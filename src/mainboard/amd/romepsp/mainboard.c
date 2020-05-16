@@ -71,6 +71,7 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 {
 	print_func_entry();
 	printk(BIOS_INFO, "Mainboard " CONFIG_MAINBOARD_PART_NUMBER " Enable.\n");
+	db();
 	print_func_exit();
 }
 

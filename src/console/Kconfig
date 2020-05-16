@@ -176,6 +176,12 @@ config CONSOLE_USB
 
 # TODO: Deps?
 # TODO: Improve description.
+config CONSOLE_DB
+	bool "Simple debugger"
+	default n
+	help
+	  simple debugger with simple commands.
+
 config CONSOLE_NE2K
 	bool "Network console over NE2000 compatible Ethernet adapter"
 	default n
@@ -460,5 +466,6 @@ config HWBASE_DEBUG_CB
 config HWBASE_DEBUG_NULL
 	def_bool y
 	depends on !HWBASE_DEBUG_CB
+
 
 endmenu

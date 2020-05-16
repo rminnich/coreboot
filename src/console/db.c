@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <arch/io.h>
+#include <cpu/cpu.h>
 
 struct cmd {
 	const char *name;
@@ -14,6 +15,12 @@ struct cmd {
 };
 
 static void help(int nargs, uint64_t *args);
+
+static void do_cpuid(int argc, uint64_t *args)
+{
+	uint32_t v = cpu_get_cpuid();
+	printk(BIOS_ERR, "%#x\r\n", v);
+}
 
 static void do_inl(int argc, uint64_t *args)
 {
@@ -65,6 +72,7 @@ static struct cmd cmds[] = {
 	{"outl", "outl address data", 2, do_outl,},
 	{"outw", "outw address data", 2, do_outw,},
 	{"outb", "outb address data", 2, do_outb,},
+	{"cpuid", "cpuid_get_cpuid from coreboot2", 0, do_cpuid,},
 };
 
 static void help(int nargc, uint64_t *args)

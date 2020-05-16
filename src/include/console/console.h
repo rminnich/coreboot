@@ -82,4 +82,6 @@ void __print_func_exit(const char *func, const char *file);
 
 int do_vprintk(int msg_level, const char *fmt, va_list args);
 
+void db(void);
+
 #endif /* CONSOLE_CONSOLE_H_ */

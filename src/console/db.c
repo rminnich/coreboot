@@ -1,0 +1,174 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+
+#include <console/console.h>
+#include <console/uart.h>
+#include <string.h>
+#include <ctype.h>
+#include <arch/io.h>
+
+struct cmd {
+	const char *name;
+	const char *usage;
+	int nargs;
+	void (*f)(int nargc, uint64_t *args);
+};
+
+static void help(int nargs, uint64_t *args);
+
+static void do_inl(int argc, uint64_t *args)
+{
+	uint16_t a = (uint16_t)args[0];
+	uint32_t v = inl(a);
+	printk(BIOS_ERR, "%#x: %#x\r\n", a, v);
+}
+
+static void do_inw(int argc, uint64_t *args)
+{
+	uint16_t a = (uint16_t)args[0];
+	uint16_t v = inw(a);
+	printk(BIOS_ERR, "%#x: %#x\r\n", a, v);
+}
+
+static void do_inb(int argc, uint64_t *args)
+{
+	uint16_t a = (uint16_t)args[0];
+	uint8_t v = inb(a);
+	printk(BIOS_ERR, "%#x: %#x\r\n", a, v);
+}
+
+static void do_outl(int argc, uint64_t *args)
+{
+	uint16_t a = (uint16_t)args[0];
+	uint32_t v = args[1];
+	outl(v, a);
+}
+
+static void do_outw(int argc, uint64_t *args)
+{
+	uint16_t a = (uint16_t)args[0];
+	uint16_t v = args[1];
+	outl(v, a);
+}
+
+static void do_outb(int argc, uint64_t *args)
+{
+	uint16_t a = (uint16_t)args[0];
+	uint8_t v = args[1];
+	outb(v, a);
+}
+
+static struct cmd cmds[] = {
+	{"?", "help", 0, help,},
+	{"inl", "inl address", 1, do_inl},
+	{"inw", "inw address", 1, do_inw,},
+	{"inb", "inb address", 1, do_inb,},
+	{"outl", "outl address data", 2, do_outl,},
+	{"outw", "outw address data", 2, do_outw,},
+	{"outb", "outb address data", 2, do_outb,},
+};
+
+static void help(int nargc, uint64_t *args)
+{
+	for (int i = 0; i < sizeof(cmds)/sizeof(cmds[0]); i++) {
+		printk(BIOS_ERR, "%s: %s, %d args\r\n", cmds[i].name, cmds[i].usage, cmds[i].nargs);
+	}
+}
+
+static uint64_t string2bin(char *s)
+{
+	uint64_t val = 0;
+
+	printk(BIOS_ERR, "Convert '%s'\r\n", s);
+	for(int i = 0; i < strlen(s); i++) {
+		uint8_t c = s[i];
+		val <<= 4;
+		if (isdigit(c)) {
+			val |= c - '0';
+		} else {
+			val |= 10 + (tolower(c)) - 'a';
+		}
+	}
+	return val;
+}
+
+#define NCMD 8
+/* this code is intended to be callable at any time, and resume at any time */
+/* Tawk to me */
+void db(void)
+{
+	struct cmd *c;
+	uint8_t b;
+	int l, ll, nargs;
+	static char line[96]; // not 80
+	static char *parms[NCMD];
+	static uint64_t args[NCMD];
+	while (1) {
+		ll = l = nargs = 0;
+		memset(line, 0, sizeof(line));
+		memset(parms, 0, sizeof(parms));
+		memset(args, 0, sizeof(args));
+		printk(BIOS_ERR, "DB>");
+		while (l < sizeof(line)) {
+			b = uart_rx_byte(0);
+			if (!b) {
+				continue;
+			}
+			if (b == 4) {
+				return;
+			}
+			uart_tx_byte(0, b);
+			if ((b == '\n') || (b == '\r')) {
+				printk(BIOS_ERR, "\r\n");
+				break;
+			}
+			line[l] = b;
+			l++;
+		}
+		printk(BIOS_ERR, "line is %s\r\n", line);
+		for(int i = 0; i < l; i++) {
+			if (isspace(line[i])) {
+				line[i] = 0;
+				continue;
+			}
+			parms[nargs] = &line[i];
+			nargs++;
+			for(;(i < l) && (! isspace(line[i])); i++)
+					;
+			if (isspace(line[i]))
+				line[i] = 0;
+		}
+		if (nargs == 0) {
+			help(0, NULL);
+			continue;
+		}
+
+		printk(BIOS_ERR, "nargs %d\r\n", nargs);
+		for(int i = 0; i < nargs; i++)
+			printk(BIOS_ERR, "%d: '%s'\r\n", i, parms[i]);
+
+		c = NULL;
+		for (int i = 0; i < sizeof(cmds)/sizeof(cmds[0]); i++) {
+			printk(BIOS_ERR, "Check '%s' against '%s'\r\n", parms[0], cmds[i].name);
+			if (! strcmp(parms[0], cmds[i].name)) {
+				printk(BIOS_ERR, "Found\r\n");
+				c = &cmds[i];
+				break;
+			}
+		}
+		if (! c) {
+			printk(BIOS_ERR, "%s: not found", parms[0]);
+			printk(BIOS_ERR, "\r\n");
+			cmds[0].f(0, NULL);
+			continue;
+		}
+		if (nargs-1 != c->nargs){
+			printk(BIOS_ERR, "Usage: %s %d args\r\n", c->name, c->nargs);
+			continue;
+		}
+		for(int i = 1; i < nargs; i++) {
+			args[i-1] = string2bin(parms[i]);
+			printk(BIOS_ERR, "%d: %#llx\r\n", i, args[i-1]);
+		}
+		c->f(nargs-1, args);
+	}
+}

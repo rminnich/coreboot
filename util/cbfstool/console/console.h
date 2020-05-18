@@ -28,4 +28,10 @@ extern int verbose;
 		}					\
 	}
 
+/* for the poor man's ftrace. */
+void __print_func_entry(const char *func, const char *file);
+void __print_func_exit(const char *func, const char *file);
+#define print_func_entry() __print_func_entry(__func__, __FILE__)
+#define print_func_exit() __print_func_exit(__func__, __FILE__)
+
 #endif

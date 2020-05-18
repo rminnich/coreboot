@@ -202,3 +202,25 @@ char *bintohex(uint8_t *data, size_t len)
 	}
 	return result;
 }
+
+static int tab_depth = 0;
+
+void __print_func_entry(const char *func, const char *file)
+{
+	char tentabs[] = "\t\t\t\t\t\t\t\t\t\t"; // ten tabs and a \0
+	char *ourtabs = &tentabs[10 - MIN(tab_depth, 10)];
+	printk(BIOS_EMERG, "%s%s() in %s\n", ourtabs, func, file);
+	tab_depth++;
+}
+/* for tracing. You can call these on func entry and exit.
+ * Or, better, you can use the spatch in utils to add
+ * such tracing.
+ */
+void __print_func_exit(const char *func, const char *file)
+{
+	char tentabs[] = "\t\t\t\t\t\t\t\t\t\t"; // ten tabs and a \0
+	char *ourtabs;
+	tab_depth--;
+	ourtabs = &tentabs[10 - MIN(tab_depth, 10)];
+	printk(BIOS_EMERG, "%s---- %s(%s)\n", ourtabs, func, file);
+}

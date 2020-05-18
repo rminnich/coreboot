@@ -14,6 +14,7 @@
 
 static unsigned long write_pirq_table(unsigned long rom_table_end)
 {
+	print_func_entry();
 	unsigned long high_table_pointer;
 
 #define MAX_PIRQ_TABLE_SIZE (4 * 1024)
@@ -41,11 +42,13 @@ static unsigned long write_pirq_table(unsigned long rom_table_end)
 				new_high_table_pointer - high_table_pointer);
 	}
 
+	print_func_exit();
 	return rom_table_end;
 }
 
 static unsigned long write_mptable(unsigned long rom_table_end)
 {
+	print_func_entry();
 	unsigned long high_table_pointer;
 
 #define MAX_MP_TABLE_SIZE (4 * 1024)
@@ -70,11 +73,13 @@ static unsigned long write_mptable(unsigned long rom_table_end)
 				new_high_table_pointer - high_table_pointer);
 	}
 
+	print_func_exit();
 	return rom_table_end;
 }
 
 static unsigned long write_acpi_table(unsigned long rom_table_end)
 {
+	print_func_entry();
 	unsigned long high_table_pointer;
 	const size_t max_acpi_size = CONFIG_MAX_ACPI_TABLE_SIZE_KB * KiB;
 
@@ -136,11 +141,13 @@ static unsigned long write_acpi_table(unsigned long rom_table_end)
 		rom_table_end = ALIGN_UP(rom_table_end, 1024);
 	}
 
+	print_func_exit();
 	return rom_table_end;
 }
 
 static unsigned long write_smbios_table(unsigned long rom_table_end)
 {
+	print_func_entry();
 	unsigned long high_table_pointer;
 
 #define MAX_SMBIOS_SIZE 2048
@@ -171,6 +178,7 @@ static unsigned long write_smbios_table(unsigned long rom_table_end)
 		rom_table_end = ALIGN_UP(new_rom_table_end, 16);
 	}
 
+	print_func_exit();
 	return rom_table_end;
 }
 
@@ -183,6 +191,7 @@ static uintptr_t forwarding_table = FORWARDING_TABLE_ADDR;
 
 void arch_write_tables(uintptr_t coreboot_table)
 {
+	print_func_entry();
 	size_t sz;
 	unsigned long rom_table_end = 0xf0000;
 
@@ -208,12 +217,15 @@ void arch_write_tables(uintptr_t coreboot_table)
 
 	/* Tell static analysis we know value is left unused. */
 	(void)rom_table_end;
+	print_func_exit();
 }
 
 void bootmem_arch_add_ranges(void)
 {
+	print_func_entry();
 	/* Memory from 0 through the forwarding_table is reserved. */
 	const uintptr_t base = 0;
 
 	bootmem_add_range(base, forwarding_table - base, BM_MEM_TABLE);
+	print_func_exit();
 }

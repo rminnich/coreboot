@@ -5,6 +5,9 @@
 #include <device/pci.h>
 #include <device/pci_ops.h>
 #include <pc80/keyboard.h>
+#include <cpu/cpu.h>
+#include <cpu/x86/msr.h>
+#include <cpu/amd/msr.h>
 
 #define Q35_PAM0            0x90
 
@@ -69,9 +72,18 @@ static const struct pci_driver nb_driver __pci_driver = {
 
 static void mainboard_amd_romepsp_enable(struct device *dev)
 {
+	msr_t msr;
+
 	print_func_entry();
 	printk(BIOS_INFO, "Mainboard " CONFIG_MAINBOARD_PART_NUMBER " Enable.\n");
 	db();
+	msr = rdmsr(MMIO_CONF_BASE);
+	printk(BIOS_ERR, "c0010058 val %x:%x\n", msr.hi, msr.lo);
+	printk(BIOS_ERR, "Setting c0010058 to %x\n", msr.lo | 0xf8000001);
+	msr.lo |= 0xf8000001;
+	wrmsr(MMIO_CONF_BASE, msr);
+	msr = rdmsr(MMIO_CONF_BASE);
+	printk(BIOS_ERR, "c0010058 val %x:%x\n", msr.hi, msr.lo);
 	print_func_exit();
 }
 

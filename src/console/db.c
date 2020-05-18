@@ -6,6 +6,8 @@
 #include <ctype.h>
 #include <arch/io.h>
 #include <cpu/cpu.h>
+#include <cpu/x86/msr.h>
+#include <cpu/amd/msr.h>
 
 struct cmd {
 	const char *name;
@@ -18,8 +20,37 @@ static void help(int nargs, uint64_t *args);
 
 static void do_cpuid(int argc, uint64_t *args)
 {
-	uint32_t v = cpu_get_cpuid();
-	printk(BIOS_ERR, "%#x\r\n", v);
+	uint32_t v;
+	v = cpuid_eax(args[0]);
+	printk(BIOS_ERR, "EAX: %#x,", v);
+	v = cpuid_ebx(args[0]);
+	printk(BIOS_ERR, "EBX: %#x,", v);
+	v = cpuid_ecx(args[0]);
+	printk(BIOS_ERR, "ECX: %#x,", v);
+	v = cpuid_edx(args[0]);
+	printk(BIOS_ERR, "EDX: %#x\r\n", v);
+}
+
+static void do_rdmsr(int argc, uint64_t *args)
+{
+	msr_t msr;
+	uint32_t a = (uint32_t) args[0];
+	msr = rdmsr(a);
+	printk(BIOS_ERR, "rdmsr %#x:%#x:%#x\r\n", a, msr.hi, msr.lo);
+}
+
+static void do_wrmsr(int argc, uint64_t *args)
+{
+	msr_t msr;
+	uint32_t a = (uint32_t) args[0];
+	uint32_t lo = (uint32_t) args[1], hi = (uint32_t)(args[1]>>32);
+	msr = rdmsr(a);
+	printk(BIOS_ERR, "wrmsr before %#x:%#x:%#x\r\n", a, msr.hi, msr.lo);
+	msr.lo = lo;
+	msr.hi = hi;
+	wrmsr(a, msr);
+	msr = rdmsr(a);
+	printk(BIOS_ERR, "wrmsr after %#x:%#x:%#x\r\n", a, msr.hi, msr.lo);
 }
 
 static void do_inl(int argc, uint64_t *args)
@@ -72,7 +103,9 @@ static struct cmd cmds[] = {
 	{"outl", "outl address data", 2, do_outl,},
 	{"outw", "outw address data", 2, do_outw,},
 	{"outb", "outb address data", 2, do_outb,},
-	{"cpuid", "cpuid_get_cpuid from coreboot2", 0, do_cpuid,},
+	{"cpuid", "cpuid_get_cpuid from coreboot2", 1, do_cpuid,},
+	{"msr", "read an MSR", 1, do_rdmsr,},
+	{"wmsr", "write an MSR", 2, do_wrmsr,},
 };
 
 static void help(int nargc, uint64_t *args)

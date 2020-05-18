@@ -30,11 +30,13 @@ static acpi_rsdp_t *valid_rsdp(acpi_rsdp_t *rsdp);
 
 u8 acpi_checksum(u8 *table, u32 length)
 {
+	print_func_entry();
 	u8 ret = 0;
 	while (length--) {
 		ret += *table;
 		table++;
 	}
+	print_func_exit();
 	return -ret;
 }
 
@@ -43,29 +45,35 @@ u8 acpi_checksum(u8 *table, u32 length)
  */
 static acpi_header_t *acpi_read_table(const char *filename, const char *tablename)
 {
+	print_func_entry();
 	acpi_header_t *file;
 	size_t table_size;
 
 	file = cbfs_boot_map_with_leak(filename, CBFS_TYPE_RAW, &table_size);
 	if (!file) {
 		printk(BIOS_ERR, "No %s file for table %s\n", filename, tablename);
+		print_func_exit();
 		return NULL;
 	}
 	if (file->length > table_size) {
 		printk(BIOS_ERR, "Invalid %s file: file length(%d) > table_size(%ld)\n",
 		       filename, file->length, table_size);
+		print_func_exit();
 		return NULL;
 	}
 	if (file->length < sizeof(acpi_header_t)) {
 		printk(BIOS_ERR, "Invalid %s file: file length(%d) < table_size(%ld)\n",
 		       filename, file->length, table_size);
+		print_func_exit();
 		return NULL;
 	}
 	if (memcmp(file->signature, tablename, 4) != 0) {
 		printk(BIOS_ERR, "Invalid %s file, signature(%s) does not match %s\n",
 		       filename, file->signature, tablename);
+		print_func_exit();
 		return NULL;
 	}
+	print_func_exit();
 	return file;
 }
 
@@ -75,6 +83,7 @@ static acpi_header_t *acpi_read_table(const char *filename, const char *tablenam
  */
 void acpi_add_table(acpi_rsdp_t *rsdp, void *table)
 {
+	print_func_entry();
 	int i, entries_num;
 	acpi_rsdt_t *rsdt;
 	acpi_xsdt_t *xsdt = NULL;
@@ -97,6 +106,7 @@ void acpi_add_table(acpi_rsdp_t *rsdp, void *table)
 	if (i >= entries_num) {
 		printk(BIOS_ERR, "ACPI: Error: Could not add ACPI table, "
 			"too many tables.\n");
+		print_func_exit();
 		return;
 	}
 
@@ -130,11 +140,13 @@ void acpi_add_table(acpi_rsdp_t *rsdp, void *table)
 
 	printk(BIOS_DEBUG, "ACPI: added table %d/%d, length now %d\n",
 		i + 1, entries_num, rsdt->header.length);
+	print_func_exit();
 }
 
 int acpi_create_mcfg_mmconfig(acpi_mcfg_mmconfig_t *mmconfig, u32 base,
 				u16 seg_nr, u8 start, u8 end)
 {
+	print_func_entry();
 	memset(mmconfig, 0, sizeof(*mmconfig));
 	mmconfig->base_address = base;
 	mmconfig->base_reserved = 0;
@@ -142,22 +154,26 @@ int acpi_create_mcfg_mmconfig(acpi_mcfg_mmconfig_t *mmconfig, u32 base,
 	mmconfig->start_bus_number = start;
 	mmconfig->end_bus_number = end;
 
+	print_func_exit();
 	return sizeof(acpi_mcfg_mmconfig_t);
 }
 
 int acpi_create_madt_lapic(acpi_madt_lapic_t *lapic, u8 cpu, u8 apic)
 {
+	print_func_entry();
 	lapic->type = LOCAL_APIC; /* Local APIC structure */
 	lapic->length = sizeof(acpi_madt_lapic_t);
 	lapic->flags = (1 << 0); /* Processor/LAPIC enabled */
 	lapic->processor_id = cpu;
 	lapic->apic_id = apic;
 
+	print_func_exit();
 	return lapic->length;
 }
 
 int acpi_create_madt_lx2apic(acpi_madt_lx2apic_t *lapic, u32 cpu, u32 apic)
 {
+	print_func_entry();
 	lapic->type = LOCAL_X2APIC; /* Local APIC structure */
 	lapic->reserved = 0;
 	lapic->length = sizeof(acpi_madt_lx2apic_t);
@@ -165,11 +181,13 @@ int acpi_create_madt_lx2apic(acpi_madt_lx2apic_t *lapic, u32 cpu, u32 apic)
 	lapic->processor_id = cpu;
 	lapic->x2apic_id = apic;
 
+	print_func_exit();
 	return lapic->length;
 }
 
 unsigned long acpi_create_madt_lapics(unsigned long current)
 {
+	print_func_entry();
 	struct device *cpu;
 	int index, apic_ids[CONFIG_MAX_CPUS] = {0}, num_cpus = 0;
 
@@ -195,12 +213,14 @@ unsigned long acpi_create_madt_lapics(unsigned long current)
 					index, apic_ids[index]);
 	}
 
+	print_func_exit();
 	return current;
 }
 
 int acpi_create_madt_ioapic(acpi_madt_ioapic_t *ioapic, u8 id, u32 addr,
 				u32 gsi_base)
 {
+	print_func_entry();
 	ioapic->type = IO_APIC; /* I/O APIC structure */
 	ioapic->length = sizeof(acpi_madt_ioapic_t);
 	ioapic->reserved = 0x00;
@@ -208,12 +228,14 @@ int acpi_create_madt_ioapic(acpi_madt_ioapic_t *ioapic, u8 id, u32 addr,
 	ioapic->ioapic_id = id;
 	ioapic->ioapic_addr = addr;
 
+	print_func_exit();
 	return ioapic->length;
 }
 
 int acpi_create_madt_irqoverride(acpi_madt_irqoverride_t *irqoverride,
 		u8 bus, u8 source, u32 gsirq, u16 flags)
 {
+	print_func_entry();
 	irqoverride->type = IRQ_SOURCE_OVERRIDE; /* Interrupt source override */
 	irqoverride->length = sizeof(acpi_madt_irqoverride_t);
 	irqoverride->bus = bus;
@@ -221,24 +243,28 @@ int acpi_create_madt_irqoverride(acpi_madt_irqoverride_t *irqoverride,
 	irqoverride->gsirq = gsirq;
 	irqoverride->flags = flags;
 
+	print_func_exit();
 	return irqoverride->length;
 }
 
 int acpi_create_madt_lapic_nmi(acpi_madt_lapic_nmi_t *lapic_nmi, u8 cpu,
 				u16 flags, u8 lint)
 {
+	print_func_entry();
 	lapic_nmi->type = LOCAL_APIC_NMI; /* Local APIC NMI structure */
 	lapic_nmi->length = sizeof(acpi_madt_lapic_nmi_t);
 	lapic_nmi->flags = flags;
 	lapic_nmi->processor_id = cpu;
 	lapic_nmi->lint = lint;
 
+	print_func_exit();
 	return lapic_nmi->length;
 }
 
 int acpi_create_madt_lx2apic_nmi(acpi_madt_lx2apic_nmi_t *lapic_nmi, u32 cpu,
 				 u16 flags, u8 lint)
 {
+	print_func_entry();
 	lapic_nmi->type = LOCAL_X2APIC_NMI; /* Local APIC NMI structure */
 	lapic_nmi->length = sizeof(acpi_madt_lx2apic_nmi_t);
 	lapic_nmi->flags = flags;
@@ -248,34 +274,41 @@ int acpi_create_madt_lx2apic_nmi(acpi_madt_lx2apic_nmi_t *lapic_nmi, u32 cpu,
 	lapic_nmi->reserved[1] = 0;
 	lapic_nmi->reserved[2] = 0;
 
+	print_func_exit();
 	return lapic_nmi->length;
 }
 
 __weak uintptr_t cpu_get_lapic_addr(void)
 {
+	print_func_entry();
 	/*
 	 * If an architecture does not support LAPIC, this weak implementation returns LAPIC
 	 * addr as 0.
 	 */
+	print_func_exit();
 	return 0;
 }
 
 void acpi_create_madt(acpi_madt_t *madt)
 {
+	print_func_entry();
 	acpi_header_t *header, *file;
 	unsigned long current = (unsigned long)madt + sizeof(acpi_madt_t);
 
 	file = acpi_read_table(CONFIG_CBFS_PREFIX "/madt.aml", "APIC");
 	if (file) {
 		memmove(madt, file, file->length);
+		print_func_exit();
 		return;
 	}
 
 	header = &(madt->header);
 	memset((void *)madt, 0, sizeof(acpi_madt_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "APIC", 4);
@@ -297,18 +330,22 @@ void acpi_create_madt(acpi_madt_t *madt)
 	header->length = current - (unsigned long)madt;
 
 	header->checksum = acpi_checksum((void *)madt, header->length);
+	print_func_exit();
 }
 
 /* MCFG is defined in the PCI Firmware Specification 3.0. */
 void acpi_create_mcfg(acpi_mcfg_t *mcfg)
 {
+	print_func_entry();
 	acpi_header_t *header = &(mcfg->header);
 	unsigned long current = (unsigned long)mcfg + sizeof(acpi_mcfg_t);
 
 	memset((void *)mcfg, 0, sizeof(acpi_mcfg_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "MCFG", 4);
@@ -325,10 +362,12 @@ void acpi_create_mcfg(acpi_mcfg_t *mcfg)
 	/* (Re)calculate length and checksum. */
 	header->length = current - (unsigned long)mcfg;
 	header->checksum = acpi_checksum((void *)mcfg, header->length);
+	print_func_exit();
 }
 
 static void *get_tcpa_log(u32 *size)
 {
+	print_func_entry();
 	const struct cbmem_entry *ce;
 	const u32 tcpa_default_log_len = 0x10000;
 	void *lasa;
@@ -337,11 +376,13 @@ static void *get_tcpa_log(u32 *size)
 		lasa = cbmem_entry_start(ce);
 		*size = cbmem_entry_size(ce);
 		printk(BIOS_DEBUG, "TCPA log found at %p\n", lasa);
+		print_func_exit();
 		return lasa;
 	}
 	lasa = cbmem_add(CBMEM_ID_TCPA_TCG_LOG, tcpa_default_log_len);
 	if (!lasa) {
 		printk(BIOS_ERR, "TCPA log creation failed\n");
+		print_func_exit();
 		return NULL;
 	}
 
@@ -349,11 +390,13 @@ static void *get_tcpa_log(u32 *size)
 	memset(lasa, 0, tcpa_default_log_len);
 
 	*size = tcpa_default_log_len;
+	print_func_exit();
 	return lasa;
 }
 
 static void acpi_create_tcpa(acpi_tcpa_t *tcpa)
 {
+	print_func_entry();
 	acpi_header_t *header = &(tcpa->header);
 	u32 tcpa_log_len;
 	void *lasa;
@@ -361,11 +404,15 @@ static void acpi_create_tcpa(acpi_tcpa_t *tcpa)
 	memset((void *)tcpa, 0, sizeof(acpi_tcpa_t));
 
 	lasa = get_tcpa_log(&tcpa_log_len);
-	if (!lasa)
+	if (!lasa) {
+		print_func_exit();
 		return;
+	}
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "TCPA", 4);
@@ -383,10 +430,12 @@ static void acpi_create_tcpa(acpi_tcpa_t *tcpa)
 
 	/* Calculate checksum. */
 	header->checksum = acpi_checksum((void *)tcpa, header->length);
+	print_func_exit();
 }
 
 static void *get_tpm2_log(u32 *size)
 {
+	print_func_entry();
 	const struct cbmem_entry *ce;
 	const u32 tpm2_default_log_len = 0x10000;
 	void *lasa;
@@ -395,11 +444,13 @@ static void *get_tpm2_log(u32 *size)
 		lasa = cbmem_entry_start(ce);
 		*size = cbmem_entry_size(ce);
 		printk(BIOS_DEBUG, "TPM2 log found at %p\n", lasa);
+		print_func_exit();
 		return lasa;
 	}
 	lasa = cbmem_add(CBMEM_ID_TPM2_TCG_LOG, tpm2_default_log_len);
 	if (!lasa) {
 		printk(BIOS_ERR, "TPM2 log creation failed\n");
+		print_func_exit();
 		return NULL;
 	}
 
@@ -407,11 +458,13 @@ static void *get_tpm2_log(u32 *size)
 	memset(lasa, 0, tpm2_default_log_len);
 
 	*size = tpm2_default_log_len;
+	print_func_exit();
 	return lasa;
 }
 
 static void acpi_create_tpm2(acpi_tpm2_t *tpm2)
 {
+	print_func_entry();
 	acpi_header_t *header = &(tpm2->header);
 	u32 tpm2_log_len;
 	void *lasa;
@@ -426,8 +479,10 @@ static void acpi_create_tpm2(acpi_tpm2_t *tpm2)
 	if (!lasa)
 		tpm2_log_len = 0;
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "TPM2", 4);
@@ -458,17 +513,21 @@ static void acpi_create_tpm2(acpi_tpm2_t *tpm2)
 
 	/* Calculate checksum. */
 	header->checksum = acpi_checksum((void *)tpm2, header->length);
+	print_func_exit();
 }
 
 static void acpi_ssdt_write_cbtable(void)
 {
+	print_func_entry();
 	const struct cbmem_entry *cbtable;
 	uintptr_t base;
 	uint32_t size;
 
 	cbtable = cbmem_entry_find(CBMEM_ID_CBTABLE);
-	if (!cbtable)
+	if (!cbtable) {
+		print_func_exit();
 		return;
+	}
 	base = (uintptr_t)cbmem_entry_start(cbtable);
 	size = cbmem_entry_size(cbtable);
 
@@ -481,10 +540,12 @@ static void acpi_ssdt_write_cbtable(void)
 	acpigen_write_mem32fixed(0, base, size);
 	acpigen_write_resourcetemplate_footer();
 	acpigen_pop_len();
+	print_func_exit();
 }
 
 void acpi_create_ssdt_generator(acpi_header_t *ssdt, const char *oem_table_id)
 {
+	print_func_entry();
 	unsigned long current = (unsigned long)ssdt + sizeof(acpi_header_t);
 
 	memset((void *)ssdt, 0, sizeof(acpi_header_t));
@@ -514,10 +575,12 @@ void acpi_create_ssdt_generator(acpi_header_t *ssdt, const char *oem_table_id)
 	/* (Re)calculate length and checksum. */
 	ssdt->length = current - (unsigned long)ssdt;
 	ssdt->checksum = acpi_checksum((void *)ssdt, ssdt->length);
+	print_func_exit();
 }
 
 int acpi_create_srat_lapic(acpi_srat_lapic_t *lapic, u8 node, u8 apic)
 {
+	print_func_entry();
 	memset((void *)lapic, 0, sizeof(acpi_srat_lapic_t));
 
 	lapic->type = 0; /* Processor local APIC/SAPIC affinity structure */
@@ -527,12 +590,14 @@ int acpi_create_srat_lapic(acpi_srat_lapic_t *lapic, u8 node, u8 apic)
 	/* TODO: proximity_domain_31_8, local SAPIC EID, clock domain. */
 	lapic->apic_id = apic;
 
+	print_func_exit();
 	return lapic->length;
 }
 
 int acpi_create_srat_mem(acpi_srat_mem_t *mem, u8 node, u32 basek, u32 sizek,
 				u32 flags)
 {
+	print_func_entry();
 	mem->type = 1; /* Memory affinity structure */
 	mem->length = sizeof(acpi_srat_mem_t);
 	mem->base_address_low = (basek << 10);
@@ -542,6 +607,7 @@ int acpi_create_srat_mem(acpi_srat_mem_t *mem, u8 node, u32 basek, u32 sizek,
 	mem->proximity_domain = node;
 	mem->flags = flags;
 
+	print_func_exit();
 	return mem->length;
 }
 
@@ -549,13 +615,16 @@ int acpi_create_srat_mem(acpi_srat_mem_t *mem, u8 node, u32 basek, u32 sizek,
 void acpi_create_srat(acpi_srat_t *srat,
 		      unsigned long (*acpi_fill_srat)(unsigned long current))
 {
+	print_func_entry();
 	acpi_header_t *header = &(srat->header);
 	unsigned long current = (unsigned long)srat + sizeof(acpi_srat_t);
 
 	memset((void *)srat, 0, sizeof(acpi_srat_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "SRAT", 4);
@@ -574,18 +643,22 @@ void acpi_create_srat(acpi_srat_t *srat,
 	/* (Re)calculate length and checksum. */
 	header->length = current - (unsigned long)srat;
 	header->checksum = acpi_checksum((void *)srat, header->length);
+	print_func_exit();
 }
 
 void acpi_create_dmar(acpi_dmar_t *dmar, enum dmar_flags flags,
 		      unsigned long (*acpi_fill_dmar)(unsigned long))
 {
+	print_func_entry();
 	acpi_header_t *header = &(dmar->header);
 	unsigned long current = (unsigned long)dmar + sizeof(acpi_dmar_t);
 
 	memset((void *)dmar, 0, sizeof(acpi_dmar_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "DMAR", 4);
@@ -605,11 +678,13 @@ void acpi_create_dmar(acpi_dmar_t *dmar, enum dmar_flags flags,
 	/* (Re)calculate length and checksum. */
 	header->length = current - (unsigned long)dmar;
 	header->checksum = acpi_checksum((void *)dmar, header->length);
+	print_func_exit();
 }
 
 unsigned long acpi_create_dmar_drhd(unsigned long current, u8 flags,
 	u16 segment, u64 bar)
 {
+	print_func_entry();
 	dmar_entry_t *drhd = (dmar_entry_t *)current;
 	memset(drhd, 0, sizeof(*drhd));
 	drhd->type = DMAR_DRHD;
@@ -618,12 +693,14 @@ unsigned long acpi_create_dmar_drhd(unsigned long current, u8 flags,
 	drhd->segment = segment;
 	drhd->bar = bar;
 
+	print_func_exit();
 	return drhd->length;
 }
 
 unsigned long acpi_create_dmar_rmrr(unsigned long current, u16 segment,
 				    u64 bar, u64 limit)
 {
+	print_func_entry();
 	dmar_rmrr_entry_t *rmrr = (dmar_rmrr_entry_t *)current;
 	memset(rmrr, 0, sizeof(*rmrr));
 	rmrr->type = DMAR_RMRR;
@@ -632,12 +709,14 @@ unsigned long acpi_create_dmar_rmrr(unsigned long current, u16 segment,
 	rmrr->bar = bar;
 	rmrr->limit = limit;
 
+	print_func_exit();
 	return rmrr->length;
 }
 
 unsigned long acpi_create_dmar_atsr(unsigned long current, u8 flags,
 	u16 segment)
 {
+	print_func_entry();
 	dmar_atsr_entry_t *atsr = (dmar_atsr_entry_t *)current;
 	memset(atsr, 0, sizeof(*atsr));
 	atsr->type = DMAR_ATSR;
@@ -645,12 +724,14 @@ unsigned long acpi_create_dmar_atsr(unsigned long current, u8 flags,
 	atsr->flags = flags;
 	atsr->segment = segment;
 
+	print_func_exit();
 	return atsr->length;
 }
 
 unsigned long acpi_create_dmar_rhsa(unsigned long current, u64 base_addr,
 	u32 proximity_domain)
 {
+	print_func_entry();
 	dmar_rhsa_entry_t *rhsa = (dmar_rhsa_entry_t *)current;
 	memset(rhsa, 0, sizeof(*rhsa));
 	rhsa->type = DMAR_RHSA;
@@ -658,12 +739,14 @@ unsigned long acpi_create_dmar_rhsa(unsigned long current, u64 base_addr,
 	rhsa->base_address = base_addr;
 	rhsa->proximity_domain = proximity_domain;
 
+	print_func_exit();
 	return rhsa->length;
 }
 
 unsigned long acpi_create_dmar_andd(unsigned long current, u8 device_number,
 	const char *device_name)
 {
+	print_func_entry();
 	dmar_andd_entry_t *andd = (dmar_andd_entry_t *)current;
 	int andd_len = sizeof(dmar_andd_entry_t) + strlen(device_name) + 1;
 	memset(andd, 0, andd_len);
@@ -672,30 +755,38 @@ unsigned long acpi_create_dmar_andd(unsigned long current, u8 device_number,
 	andd->device_number = device_number;
 	memcpy(&andd->device_name, device_name, strlen(device_name));
 
+	print_func_exit();
 	return andd->length;
 }
 
 void acpi_dmar_drhd_fixup(unsigned long base, unsigned long current)
 {
+	print_func_entry();
 	dmar_entry_t *drhd = (dmar_entry_t *)base;
 	drhd->length = current - base;
+	print_func_exit();
 }
 
 void acpi_dmar_rmrr_fixup(unsigned long base, unsigned long current)
 {
+	print_func_entry();
 	dmar_rmrr_entry_t *rmrr = (dmar_rmrr_entry_t *)base;
 	rmrr->length = current - base;
+	print_func_exit();
 }
 
 void acpi_dmar_atsr_fixup(unsigned long base, unsigned long current)
 {
+	print_func_entry();
 	dmar_atsr_entry_t *atsr = (dmar_atsr_entry_t *)base;
 	atsr->length = current - base;
+	print_func_exit();
 }
 
 static unsigned long acpi_create_dmar_ds(unsigned long current,
 	enum dev_scope_type type, u8 enumeration_id, u8 bus, u8 dev, u8 fn)
 {
+	print_func_entry();
 	/* we don't support longer paths yet */
 	const size_t dev_scope_length = sizeof(dev_scope_t) + 2;
 
@@ -708,12 +799,15 @@ static unsigned long acpi_create_dmar_ds(unsigned long current,
 	ds->path[0].dev	= dev;
 	ds->path[0].fn	= fn;
 
+	print_func_exit();
 	return ds->length;
 }
 
 unsigned long acpi_create_dmar_ds_pci_br(unsigned long current, u8 bus,
 	u8 dev, u8 fn)
 {
+	print_func_entry();
+	print_func_exit();
 	return acpi_create_dmar_ds(current,
 			SCOPE_PCI_SUB, 0, bus, dev, fn);
 }
@@ -721,6 +815,8 @@ unsigned long acpi_create_dmar_ds_pci_br(unsigned long current, u8 bus,
 unsigned long acpi_create_dmar_ds_pci(unsigned long current, u8 bus,
 	u8 dev, u8 fn)
 {
+	print_func_entry();
+	print_func_exit();
 	return acpi_create_dmar_ds(current,
 			SCOPE_PCI_ENDPOINT, 0, bus, dev, fn);
 }
@@ -728,6 +824,8 @@ unsigned long acpi_create_dmar_ds_pci(unsigned long current, u8 bus,
 unsigned long acpi_create_dmar_ds_ioapic(unsigned long current,
 	u8 enumeration_id, u8 bus, u8 dev, u8 fn)
 {
+	print_func_entry();
+	print_func_exit();
 	return acpi_create_dmar_ds(current,
 			SCOPE_IOAPIC, enumeration_id, bus, dev, fn);
 }
@@ -735,6 +833,8 @@ unsigned long acpi_create_dmar_ds_ioapic(unsigned long current,
 unsigned long acpi_create_dmar_ds_msi_hpet(unsigned long current,
 	u8 enumeration_id, u8 bus, u8 dev, u8 fn)
 {
+	print_func_entry();
+	print_func_exit();
 	return acpi_create_dmar_ds(current,
 			SCOPE_MSI_HPET, enumeration_id, bus, dev, fn);
 }
@@ -743,13 +843,16 @@ unsigned long acpi_create_dmar_ds_msi_hpet(unsigned long current,
 void acpi_create_slit(acpi_slit_t *slit,
 		      unsigned long (*acpi_fill_slit)(unsigned long current))
 {
+	print_func_entry();
 	acpi_header_t *header = &(slit->header);
 	unsigned long current = (unsigned long)slit + sizeof(acpi_slit_t);
 
 	memset((void *)slit, 0, sizeof(acpi_slit_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "SLIT", 4);
@@ -766,18 +869,22 @@ void acpi_create_slit(acpi_slit_t *slit,
 	/* (Re)calculate length and checksum. */
 	header->length = current - (unsigned long)slit;
 	header->checksum = acpi_checksum((void *)slit, header->length);
+	print_func_exit();
 }
 
 /* http://www.intel.com/hardwaredesign/hpetspec_1.pdf */
 void acpi_create_hpet(acpi_hpet_t *hpet)
 {
+	print_func_entry();
 	acpi_header_t *header = &(hpet->header);
 	acpi_addr_t *addr = &(hpet->addr);
 
 	memset((void *)hpet, 0, sizeof(acpi_hpet_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "HPET", 4);
@@ -801,6 +908,7 @@ void acpi_create_hpet(acpi_hpet_t *hpet)
 	hpet->min_tick = CONFIG_HPET_MIN_TICKS;
 
 	header->checksum = acpi_checksum((void *)hpet, sizeof(acpi_hpet_t));
+	print_func_exit();
 }
 
 void acpi_create_vfct(const struct device *device,
@@ -808,13 +916,16 @@ void acpi_create_vfct(const struct device *device,
 		      unsigned long (*acpi_fill_vfct)(const struct device *device,
 		      acpi_vfct_t *vfct_struct, unsigned long current))
 {
+	print_func_entry();
 	acpi_header_t *header = &(vfct->header);
 	unsigned long current = (unsigned long)vfct + sizeof(acpi_vfct_t);
 
 	memset((void *)vfct, 0, sizeof(acpi_vfct_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "VFCT", 4);
@@ -828,12 +939,15 @@ void acpi_create_vfct(const struct device *device,
 	current = acpi_fill_vfct(device, vfct, current);
 
 	/* If no BIOS image, return with header->length == 0. */
-	if (!vfct->VBIOSImageOffset)
+	if (!vfct->VBIOSImageOffset) {
+		print_func_exit();
 		return;
+	}
 
 	/* (Re)calculate length and checksum. */
 	header->length = current - (unsigned long)vfct;
 	header->checksum = acpi_checksum((void *)vfct, header->length);
+	print_func_exit();
 }
 
 void acpi_create_ipmi(const struct device *device,
@@ -845,6 +959,7 @@ void acpi_create_ipmi(const struct device *device,
 		      const u32 apic_interrupt,
 		      const u32 uid)
 {
+	print_func_entry();
 	acpi_header_t *header = &(spmi->header);
 	memset((void *)spmi, 0, sizeof(struct acpi_spmi));
 
@@ -885,19 +1000,23 @@ void acpi_create_ipmi(const struct device *device,
 
 	/* Calculate checksum. */
 	header->checksum = acpi_checksum((void *)spmi, header->length);
+	print_func_exit();
 }
 
 void acpi_create_ivrs(acpi_ivrs_t *ivrs,
 		      unsigned long (*acpi_fill_ivrs)(acpi_ivrs_t *ivrs_struct,
 		      unsigned long current))
 {
+	print_func_entry();
 	acpi_header_t *header = &(ivrs->header);
 	unsigned long current = (unsigned long)ivrs + sizeof(acpi_ivrs_t);
 
 	memset((void *)ivrs, 0, sizeof(acpi_ivrs_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "IVRS", 4);
@@ -914,11 +1033,13 @@ void acpi_create_ivrs(acpi_ivrs_t *ivrs,
 	/* (Re)calculate length and checksum. */
 	header->length = current - (unsigned long)ivrs;
 	header->checksum = acpi_checksum((void *)ivrs, header->length);
+	print_func_exit();
 }
 
 unsigned long acpi_write_hpet(const struct device *device, unsigned long current,
 	acpi_rsdp_t *rsdp)
 {
+	print_func_entry();
 	acpi_hpet_t *hpet;
 
 	/*
@@ -932,6 +1053,7 @@ unsigned long acpi_write_hpet(const struct device *device, unsigned long current
 	acpi_create_hpet(hpet);
 	acpi_add_table(rsdp, hpet);
 
+	print_func_exit();
 	return current;
 }
 
@@ -940,6 +1062,7 @@ void acpi_create_dbg2(acpi_dbg2_header_t *dbg2,
 		      acpi_addr_t *address, uint32_t address_size,
 		      const char *device_path)
 {
+	print_func_entry();
 	uintptr_t current;
 	acpi_dbg2_device_t *device;
 	uint32_t *dbg2_addr_size;
@@ -953,8 +1076,10 @@ void acpi_create_dbg2(acpi_dbg2_header_t *dbg2,
 	memset(dbg2, 0, sizeof(acpi_dbg2_header_t));
 	header = &(dbg2->header);
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	header->revision = get_acpi_table_revision(DBG2);
 	memcpy(header->signature, "DBG2", 4);
@@ -1003,27 +1128,32 @@ void acpi_create_dbg2(acpi_dbg2_header_t *dbg2,
 	device->length = current - (uintptr_t)device;
 	header->length = current - (uintptr_t)dbg2;
 	header->checksum = acpi_checksum((uint8_t *)dbg2, header->length);
+	print_func_exit();
 }
 
 unsigned long acpi_write_dbg2_pci_uart(acpi_rsdp_t *rsdp, unsigned long current,
 				const struct device *dev, uint8_t access_size)
 {
+	print_func_entry();
 	acpi_dbg2_header_t *dbg2 = (acpi_dbg2_header_t *)current;
 	struct resource *res;
 	acpi_addr_t address;
 
 	if (!dev) {
 		printk(BIOS_DEBUG, "%s: Device not found\n", __func__);
+		print_func_exit();
 		return current;
 	}
 	if (!dev->enabled) {
 		printk(BIOS_INFO, "%s: Device not enabled\n", __func__);
+		print_func_exit();
 		return current;
 	}
 	res = find_resource(dev, PCI_BASE_ADDRESS_0);
 	if (!res) {
 		printk(BIOS_ERR, "%s: Unable to find resource for %s\n",
 		       __func__, dev_path(dev));
+		print_func_exit();
 		return current;
 	}
 
@@ -1034,6 +1164,7 @@ unsigned long acpi_write_dbg2_pci_uart(acpi_rsdp_t *rsdp, unsigned long current,
 		address.space_id = ACPI_ADDRESS_SPACE_MEMORY;
 	else {
 		printk(BIOS_ERR, "%s: Unknown address space type\n", __func__);
+		print_func_exit();
 		return current;
 	}
 
@@ -1053,11 +1184,13 @@ unsigned long acpi_write_dbg2_pci_uart(acpi_rsdp_t *rsdp, unsigned long current,
 		acpi_add_table(rsdp, dbg2);
 	}
 
+	print_func_exit();
 	return current;
 }
 
 void acpi_create_facs(acpi_facs_t *facs)
 {
+	print_func_entry();
 	memset((void *)facs, 0, sizeof(acpi_facs_t));
 
 	memcpy(facs->signature, "FACS", 4);
@@ -1069,14 +1202,18 @@ void acpi_create_facs(acpi_facs_t *facs)
 	facs->x_firmware_waking_vector_l = 0;
 	facs->x_firmware_waking_vector_h = 0;
 	facs->version = get_acpi_table_revision(FACS);
+	print_func_exit();
 }
 
 static void acpi_write_rsdt(acpi_rsdt_t *rsdt, char *oem_id, char *oem_table_id)
 {
+	print_func_entry();
 	acpi_header_t *header = &(rsdt->header);
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "RSDT", 4);
@@ -1092,14 +1229,18 @@ static void acpi_write_rsdt(acpi_rsdt_t *rsdt, char *oem_id, char *oem_table_id)
 
 	/* Fix checksum. */
 	header->checksum = acpi_checksum((void *)rsdt, sizeof(acpi_rsdt_t));
+	print_func_exit();
 }
 
 static void acpi_write_xsdt(acpi_xsdt_t *xsdt, char *oem_id, char *oem_table_id)
 {
+	print_func_entry();
 	acpi_header_t *header = &(xsdt->header);
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	/* Fill out header fields. */
 	memcpy(header->signature, "XSDT", 4);
@@ -1115,11 +1256,13 @@ static void acpi_write_xsdt(acpi_xsdt_t *xsdt, char *oem_id, char *oem_table_id)
 
 	/* Fix checksum. */
 	header->checksum = acpi_checksum((void *)xsdt, sizeof(acpi_xsdt_t));
+	print_func_exit();
 }
 
 static void acpi_write_rsdp(acpi_rsdp_t *rsdp, acpi_rsdt_t *rsdt,
 			    acpi_xsdt_t *xsdt, char *oem_id)
 {
+	print_func_entry();
 	memset(rsdp, 0, sizeof(acpi_rsdp_t));
 
 	memcpy(rsdp->signature, RSDP_SIG, 8);
@@ -1145,11 +1288,13 @@ static void acpi_write_rsdp(acpi_rsdp_t *rsdp, acpi_rsdt_t *rsdt,
 	/* Calculate checksums. */
 	rsdp->checksum = acpi_checksum((void *)rsdp, 20);
 	rsdp->ext_checksum = acpi_checksum((void *)rsdp, sizeof(acpi_rsdp_t));
+	print_func_exit();
 }
 
 unsigned long acpi_create_hest_error_source(acpi_hest_t *hest,
 	acpi_hest_esd_t *esd, u16 type, void *data, u16 data_len)
 {
+	print_func_entry();
 	acpi_header_t *header = &(hest->header);
 	acpi_hest_hen_t *hen;
 	void *pos;
@@ -1204,6 +1349,7 @@ unsigned long acpi_create_hest_error_source(acpi_hest_t *hest,
 	if (header)
 		header->length += len;
 
+	print_func_exit();
 	return len;
 }
 
@@ -1211,12 +1357,15 @@ unsigned long acpi_create_hest_error_source(acpi_hest_t *hest,
 void acpi_write_hest(acpi_hest_t *hest,
 		     unsigned long (*acpi_fill_hest)(acpi_hest_t *hest))
 {
+	print_func_entry();
 	acpi_header_t *header = &(hest->header);
 
 	memset(hest, 0, sizeof(acpi_hest_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	memcpy(header->signature, "HEST", 4);
 	memcpy(header->oem_id, OEM_ID, 6);
@@ -1230,17 +1379,21 @@ void acpi_write_hest(acpi_hest_t *hest,
 
 	/* Calculate checksums. */
 	header->checksum = acpi_checksum((void *)hest, header->length);
+	print_func_exit();
 }
 
 /* ACPI 3.0b */
 void acpi_write_bert(acpi_bert_t *bert, uintptr_t region, size_t length)
 {
+	print_func_entry();
 	acpi_header_t *header = &(bert->header);
 
 	memset(bert, 0, sizeof(acpi_bert_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	memcpy(header->signature, "BERT", 4);
 	memcpy(header->oem_id, OEM_ID, 6);
@@ -1255,6 +1408,7 @@ void acpi_write_bert(acpi_bert_t *bert, uintptr_t region, size_t length)
 
 	/* Calculate checksums. */
 	header->checksum = acpi_checksum((void *)bert, header->length);
+	print_func_exit();
 }
 
 __weak void soc_fill_fadt(acpi_fadt_t *fadt) { }
@@ -1262,12 +1416,15 @@ __weak void mainboard_fill_fadt(acpi_fadt_t *fadt) { }
 
 void acpi_create_fadt(acpi_fadt_t *fadt, acpi_facs_t *facs, void *dsdt)
 {
+	print_func_entry();
 	acpi_header_t *header = &(fadt->header);
 
 	memset((void *) fadt, 0, sizeof(acpi_fadt_t));
 
-	if (!header)
+	if (!header) {
+		print_func_exit();
 		return;
+	}
 
 	memcpy(header->signature, "FACP", 4);
 	header->length = sizeof(acpi_fadt_t);
@@ -1304,15 +1461,19 @@ void acpi_create_fadt(acpi_fadt_t *fadt, acpi_facs_t *facs, void *dsdt)
 
 	header->checksum =
 	    acpi_checksum((void *) fadt, header->length);
+	print_func_exit();
 }
 
 unsigned long __weak fw_cfg_acpi_tables(unsigned long start)
 {
+	print_func_entry();
+	print_func_exit();
 	return 0;
 }
 
 unsigned long write_acpi_tables(unsigned long start)
 {
+	print_func_entry();
 	unsigned long current;
 	acpi_rsdp_t *rsdp;
 	acpi_rsdt_t *rsdt;
@@ -1347,8 +1508,10 @@ unsigned long write_acpi_tables(unsigned long start)
 				break;
 			}
 		}
-		if (!rsdp)
+		if (!rsdp) {
+			print_func_exit();
 			return fw;
+		}
 
 		/* Add BOOT0000 for Linux google firmware driver */
 		printk(BIOS_DEBUG, "ACPI:     * SSDT\n");
@@ -1379,6 +1542,7 @@ unsigned long write_acpi_tables(unsigned long start)
 
 		acpi_add_table(rsdp, ssdt);
 
+		print_func_exit();
 		return fw;
 	}
 
@@ -1387,6 +1551,7 @@ unsigned long write_acpi_tables(unsigned long start)
 				     CBFS_TYPE_RAW, &dsdt_size);
 	if (!dsdt_file) {
 		printk(BIOS_ERR, "No DSDT file, skipping ACPI tables\n");
+		print_func_exit();
 		return current;
 	}
 
@@ -1394,6 +1559,7 @@ unsigned long write_acpi_tables(unsigned long start)
 	    || dsdt_file->length < sizeof(acpi_header_t)
 	    || memcmp(dsdt_file->signature, "DSDT", 4) != 0) {
 		printk(BIOS_ERR, "Invalid DSDT file, skipping ACPI tables\n");
+		print_func_exit();
 		return current;
 	}
 
@@ -1543,30 +1709,40 @@ unsigned long write_acpi_tables(unsigned long start)
 	}
 
 	printk(BIOS_INFO, "ACPI: done.\n");
+	print_func_exit();
 	return current;
 }
 
 static acpi_rsdp_t *valid_rsdp(acpi_rsdp_t *rsdp)
 {
-	if (strncmp((char *)rsdp, RSDP_SIG, sizeof(RSDP_SIG) - 1) != 0)
+	print_func_entry();
+	if (strncmp((char *)rsdp, RSDP_SIG, sizeof(RSDP_SIG) - 1) != 0) {
+		print_func_exit();
 		return NULL;
+	}
 
 	printk(BIOS_DEBUG, "Looking on %p for valid checksum\n", rsdp);
 
-	if (acpi_checksum((void *)rsdp, 20) != 0)
+	if (acpi_checksum((void *)rsdp, 20) != 0) {
+		print_func_exit();
 		return NULL;
+	}
 	printk(BIOS_DEBUG, "Checksum 1 passed\n");
 
 	if ((rsdp->revision > 1) && (acpi_checksum((void *)rsdp,
-						rsdp->length) != 0))
+						rsdp->length) != 0)) {
+		print_func_exit();
 		return NULL;
+	}
 	printk(BIOS_DEBUG, "Checksum 2 passed all OK\n");
 
+	print_func_exit();
 	return rsdp;
 }
 
 void *acpi_find_wakeup_vector(void)
 {
+	print_func_entry();
 	char *p, *end;
 	acpi_rsdt_t *rsdt;
 	acpi_facs_t *facs;
@@ -1575,8 +1751,10 @@ void *acpi_find_wakeup_vector(void)
 	void *wake_vec;
 	int i;
 
-	if (!acpi_is_wakeup())
+	if (!acpi_is_wakeup()) {
+		print_func_exit();
 		return NULL;
+	}
 
 	printk(BIOS_DEBUG, "Trying to find the wakeup vector...\n");
 
@@ -1590,6 +1768,7 @@ void *acpi_find_wakeup_vector(void)
 	if (rsdp == NULL) {
 		printk(BIOS_ALERT,
 		       "No RSDP found, wake up from S3 not possible.\n");
+		print_func_exit();
 		return NULL;
 	}
 
@@ -1609,6 +1788,7 @@ void *acpi_find_wakeup_vector(void)
 	if (fadt == NULL) {
 		printk(BIOS_ALERT,
 		       "No FADT found, wake up from S3 not possible.\n");
+		print_func_exit();
 		return NULL;
 	}
 
@@ -1618,6 +1798,7 @@ void *acpi_find_wakeup_vector(void)
 	if (facs == NULL) {
 		printk(BIOS_ALERT,
 		       "No FACS found, wake up from S3 not possible.\n");
+		print_func_exit();
 		return NULL;
 	}
 
@@ -1625,60 +1806,86 @@ void *acpi_find_wakeup_vector(void)
 	wake_vec = (void *)(uintptr_t)facs->firmware_waking_vector;
 	printk(BIOS_DEBUG, "OS waking vector is %p\n", wake_vec);
 
+	print_func_exit();
 	return wake_vec;
 }
 
 __weak int acpi_get_gpe(int gpe)
 {
+	print_func_entry();
+	print_func_exit();
 	return -1; /* implemented by SOC */
 }
 
 int get_acpi_table_revision(enum acpi_tables table)
 {
+	print_func_entry();
 	switch (table) {
 	case FADT:
+		print_func_exit();
 		return ACPI_FADT_REV_ACPI_6_0;
 	case MADT: /* ACPI 3.0: 2, ACPI 4.0/5.0: 3, ACPI 6.2b/6.3: 5 */
+		print_func_exit();
 		return 3;
 	case MCFG:
+		print_func_exit();
 		return 1;
 	case TCPA:
+		print_func_exit();
 		return 2;
 	case TPM2:
+		print_func_exit();
 		return 4;
 	case SSDT: /* ACPI 3.0 upto 6.3: 2 */
+		print_func_exit();
 		return 2;
 	case SRAT: /* ACPI 2.0: 1, ACPI 3.0: 2, ACPI 4.0 upto 6.3: 3 */
+		print_func_exit();
 		return 1; /* TODO Should probably be upgraded to 2 */
 	case DMAR:
+		print_func_exit();
 		return 1;
 	case SLIT: /* ACPI 2.0 upto 6.3: 1 */
+		print_func_exit();
 		return 1;
 	case SPMI: /* IMPI 2.0 */
+		print_func_exit();
 		return 5;
 	case HPET: /* Currently 1. Table added in ACPI 2.0. */
+		print_func_exit();
 		return 1;
 	case VFCT: /* ACPI 2.0/3.0/4.0: 1 */
+		print_func_exit();
 		return 1;
 	case IVRS:
+		print_func_exit();
 		return IVRS_FORMAT_FIXED;
 	case DBG2:
+		print_func_exit();
 		return 0;
 	case FACS: /* ACPI 2.0/3.0: 1, ACPI 4.0 upto 6.3: 2 */
+		print_func_exit();
 		return 1;
 	case RSDT: /* ACPI 1.0 upto 6.3: 1 */
+		print_func_exit();
 		return 1;
 	case XSDT: /* ACPI 2.0 upto 6.3: 1 */
+		print_func_exit();
 		return 1;
 	case RSDP: /* ACPI 2.0 upto 6.3: 2 */
+		print_func_exit();
 		return 2;
 	case HEST:
+		print_func_exit();
 		return 1;
 	case NHLT:
+		print_func_exit();
 		return 5;
 	case BERT:
+		print_func_exit();
 		return 1;
 	default:
+		print_func_exit();
 		return -1;
 	}
 	return -1;

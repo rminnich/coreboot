@@ -39,6 +39,14 @@ static void do_rdmsr(int argc, uint64_t *args)
 	printk(BIOS_ERR, "rdmsr %#x:%#x:%#x\r\n", a, msr.hi, msr.lo);
 }
 
+static void do_mem(int argc, uint64_t *args)
+{
+	uint32_t v;
+	uint32_t *a = (uint32_t*) (uint32_t)(args[0]);
+	v = *a;
+	printk(BIOS_ERR, "mem %p:%#x\r\n", a, v);
+}
+
 static void do_wrmsr(int argc, uint64_t *args)
 {
 	msr_t msr;
@@ -106,6 +114,7 @@ static struct cmd cmds[] = {
 	{"cpuid", "cpuid_get_cpuid from coreboot2", 1, do_cpuid,},
 	{"msr", "read an MSR", 1, do_rdmsr,},
 	{"wmsr", "write an MSR", 2, do_wrmsr,},
+	{"mem", "read mem", 1, do_mem,},
 };
 
 static void help(int nargc, uint64_t *args)

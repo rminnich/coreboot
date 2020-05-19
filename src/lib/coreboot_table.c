@@ -35,6 +35,7 @@
 #else
 void lb_string_platform_blob_version(struct lb_header *header);
 #endif
+#include <lib.h>
 
 static struct lb_header *lb_table_init(unsigned long addr)
 {
@@ -718,7 +719,8 @@ void *write_tables(void)
 	const size_t max_table_size = COREBOOT_TABLE_SIZE;
 
 	cbtable_start = (uintptr_t)cbmem_add(CBMEM_ID_CBTABLE, max_table_size);
-	printk(BIOS_ERR, "cbtable_start is %#x\n", cbtable_start);
+	printk(BIOS_ERR, "cbtable_start is %#lx, max size %#lx\n", cbtable_start, max_table_size);
+	hexdump((void *)cbtable_start, max_table_size);
 
 	if (!cbtable_start) {
 		printk(BIOS_ERR, "Could not add CBMEM for coreboot table.\n");
@@ -728,7 +730,9 @@ void *write_tables(void)
 	}
 
 	/* Add architecture specific tables. */
+	hexdump((void *)cbtable_start, max_table_size);
 	arch_write_tables(cbtable_start);
+	hexdump((void *)cbtable_start, max_table_size);
 
 	/* Write the coreboot table. */
 	cbtable_end = write_coreboot_table(cbtable_start);

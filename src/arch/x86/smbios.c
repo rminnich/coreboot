@@ -121,6 +121,7 @@ int smbios_add_string(u8 *start, const char *str)
 		i++;
 	}
 	print_func_exit();
+	return 0;
 }
 
 int smbios_string_table_len(u8 *start)

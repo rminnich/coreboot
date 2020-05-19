@@ -203,6 +203,7 @@ void arch_write_tables(uintptr_t coreboot_table)
 	if (CONFIG(GENERATE_MP_TABLE))
 		rom_table_end = write_mptable(rom_table_end);
 
+	printk(BIOS_SPEW, "werite acpi  @ %#lx\n", rom_table_end);
 	if (CONFIG(HAVE_ACPI_TABLES))
 		rom_table_end = write_acpi_table(rom_table_end);
 

@@ -38,6 +38,7 @@ void lb_string_platform_blob_version(struct lb_header *header);
 
 static struct lb_header *lb_table_init(unsigned long addr)
 {
+	print_func_entry();
 	struct lb_header *header;
 
 	/* 16 byte align the address */
@@ -54,26 +55,32 @@ static struct lb_header *lb_table_init(unsigned long addr)
 	header->table_bytes = 0;
 	header->table_checksum = 0;
 	header->table_entries = 0;
+	print_func_exit();
 	return header;
 }
 
 static struct lb_record *lb_first_record(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_record *rec;
 	rec = (void *)(((char *)header) + sizeof(*header));
+	print_func_exit();
 	return rec;
 }
 
 static struct lb_record *lb_last_record(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_record *rec;
 	rec = (void *)(((char *)header) + sizeof(*header)
 		+ header->table_bytes);
+	print_func_exit();
 	return rec;
 }
 
 struct lb_record *lb_new_record(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_record *rec;
 	rec = lb_last_record(header);
 	if (header->table_entries)
@@ -82,22 +89,26 @@ struct lb_record *lb_new_record(struct lb_header *header)
 	header->table_entries++;
 	rec->tag = LB_TAG_UNUSED;
 	rec->size = sizeof(*rec);
+	print_func_exit();
 	return rec;
 }
 
 static struct lb_memory *lb_memory(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_record *rec;
 	struct lb_memory *mem;
 	rec = lb_new_record(header);
 	mem = (struct lb_memory *)rec;
 	mem->tag = LB_TAG_MEMORY;
 	mem->size = sizeof(*mem);
+	print_func_exit();
 	return mem;
 }
 
 void lb_add_serial(struct lb_serial *new_serial, void *data)
 {
+	print_func_entry();
 	struct lb_header *header = (struct lb_header *)data;
 	struct lb_serial *serial;
 
@@ -110,10 +121,12 @@ void lb_add_serial(struct lb_serial *new_serial, void *data)
 	serial->regwidth = new_serial->regwidth;
 	serial->input_hertz = new_serial->input_hertz;
 	serial->uart_pci_addr = new_serial->uart_pci_addr;
+	print_func_exit();
 }
 
 void lb_add_console(uint16_t consoletype, void *data)
 {
+	print_func_entry();
 	struct lb_header *header = (struct lb_header *)data;
 	struct lb_console *console;
 
@@ -121,15 +134,19 @@ void lb_add_console(uint16_t consoletype, void *data)
 	console->tag = LB_TAG_CONSOLE;
 	console->size = sizeof(*console);
 	console->type = consoletype;
+	print_func_exit();
 }
 
 static void lb_framebuffer(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_framebuffer *framebuffer;
 	struct lb_framebuffer fb = {0};
 
-	if (!CONFIG(LINEAR_FRAMEBUFFER) || fill_lb_framebuffer(&fb))
+	if (!CONFIG(LINEAR_FRAMEBUFFER) || fill_lb_framebuffer(&fb)) {
+		print_func_exit();
 		return;
+	}
 
 	framebuffer = (struct lb_framebuffer *)lb_new_record(header);
 	memcpy(framebuffer, &fb, sizeof(*framebuffer));
@@ -143,21 +160,25 @@ static void lb_framebuffer(struct lb_header *header)
 		unsigned int depth = framebuffer->bits_per_pixel;
 		set_bootsplash(fb_ptr, width, height, depth);
 	}
+	print_func_exit();
 }
 
 void lb_add_gpios(struct lb_gpios *gpios, const struct lb_gpio *gpio_table,
 		  size_t count)
 {
+	print_func_entry();
 	size_t table_size = count * sizeof(struct lb_gpio);
 
 	memcpy(&gpios->gpios[gpios->count], gpio_table, table_size);
 	gpios->count += count;
 	gpios->size += table_size;
+	print_func_exit();
 }
 
 #if CONFIG(CHROMEOS)
 static void lb_gpios(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_gpios *gpios;
 	struct lb_gpio *g;
 
@@ -192,10 +213,12 @@ static void lb_gpios(struct lb_header *header)
 			break;
 		}
 	}
+	print_func_exit();
 }
 
 static void lb_vbnv(struct lb_header *header)
 {
+	print_func_entry();
 #if CONFIG(PC80_SYSTEM)
 	struct lb_range *vbnv;
 
@@ -205,20 +228,30 @@ static void lb_vbnv(struct lb_header *header)
 	vbnv->range_start = CONFIG_VBOOT_VBNV_OFFSET + 14;
 	vbnv->range_size = VBOOT_VBNV_BLOCK_SIZE;
 #endif
+	print_func_exit();
 }
 #endif /* CONFIG_CHROMEOS */
 
-__weak uint32_t board_id(void) { return UNDEFINED_STRAPPING_ID; }
-__weak uint32_t ram_code(void) { return UNDEFINED_STRAPPING_ID; }
-__weak uint32_t sku_id(void) { return UNDEFINED_STRAPPING_ID; }
+__weak uint32_t board_id(void) {
+	print_func_entry(); print_func_exit();
+	return UNDEFINED_STRAPPING_ID; }
+__weak uint32_t ram_code(void) {
+	print_func_entry(); print_func_exit();
+	return UNDEFINED_STRAPPING_ID; }
+__weak uint32_t sku_id(void) {
+	print_func_entry(); print_func_exit();
+	return UNDEFINED_STRAPPING_ID; }
 
 static void lb_board_id(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_strapping_id  *rec;
 	uint32_t bid = board_id();
 
-	if (bid == UNDEFINED_STRAPPING_ID)
+	if (bid == UNDEFINED_STRAPPING_ID) {
+		print_func_exit();
 		return;
+	}
 
 	rec = (struct lb_strapping_id *)lb_new_record(header);
 
@@ -227,22 +260,28 @@ static void lb_board_id(struct lb_header *header)
 	rec->id_code = bid;
 
 	printk(BIOS_INFO, "Board ID: %d\n", bid);
+	print_func_exit();
 }
 
 static void lb_boot_media_params(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_boot_media_params *bmp;
 	const struct region_device *boot_dev;
 	struct region_device cbfs_dev;
 
 	boot_device_init();
 
-	if (cbfs_boot_region_device(&cbfs_dev))
+	if (cbfs_boot_region_device(&cbfs_dev)) {
+		print_func_exit();
 		return;
+	}
 
 	boot_dev = boot_device_ro();
-	if (boot_dev == NULL)
+	if (boot_dev == NULL) {
+		print_func_exit();
 		return;
+	}
 
 	bmp = (struct lb_boot_media_params *)lb_new_record(header);
 	bmp->tag = LB_TAG_BOOT_MEDIA_PARAMS;
@@ -253,15 +292,19 @@ static void lb_boot_media_params(struct lb_header *header)
 	bmp->boot_media_size = region_device_sz(boot_dev);
 
 	bmp->fmap_offset = get_fmap_flash_offset();
+	print_func_exit();
 }
 
 static void lb_ram_code(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_strapping_id *rec;
 	uint32_t code = ram_code();
 
-	if (code == UNDEFINED_STRAPPING_ID)
+	if (code == UNDEFINED_STRAPPING_ID) {
+		print_func_exit();
 		return;
+	}
 
 	rec = (struct lb_strapping_id *)lb_new_record(header);
 
@@ -270,15 +313,19 @@ static void lb_ram_code(struct lb_header *header)
 	rec->id_code = code;
 
 	printk(BIOS_INFO, "RAM code: %d\n", code);
+	print_func_exit();
 }
 
 static void lb_sku_id(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_strapping_id *rec;
 	uint32_t sid = sku_id();
 
-	if (sid == UNDEFINED_STRAPPING_ID)
+	if (sid == UNDEFINED_STRAPPING_ID) {
+		print_func_exit();
 		return;
+	}
 
 	rec = (struct lb_strapping_id *)lb_new_record(header);
 
@@ -287,26 +334,32 @@ static void lb_sku_id(struct lb_header *header)
 	rec->id_code = sid;
 
 	printk(BIOS_INFO, "SKU ID: %d\n", sid);
+	print_func_exit();
 }
 
 static void lb_mmc_info(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_mmc_info *rec;
 	int32_t *ms_cbmem;
 
 	ms_cbmem = cbmem_find(CBMEM_ID_MMC_STATUS);
-	if (!ms_cbmem)
+	if (!ms_cbmem) {
+		print_func_exit();
 		return;
+	}
 
 	rec = (struct lb_mmc_info *)lb_new_record(header);
 
 	rec->tag = LB_TAG_MMC_INFO;
 	rec->size = sizeof(*rec);
 	rec->early_cmd1_status = *ms_cbmem;
+	print_func_exit();
 }
 
 static void add_cbmem_pointers(struct lb_header *header)
 {
+	print_func_entry();
 	/*
 	 * These CBMEM sections' addresses are included in the coreboot table
 	 * with the appropriate tags.
@@ -343,10 +396,12 @@ static void add_cbmem_pointers(struct lb_header *header)
 		cbmem_ref->size = sizeof(*cbmem_ref);
 		cbmem_ref->cbmem_addr = (unsigned long)cbmem_addr;
 	}
+	print_func_exit();
 }
 
 static struct lb_mainboard *lb_mainboard(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_record *rec;
 	struct lb_mainboard *mainboard;
 	rec = lb_new_record(header);
@@ -365,12 +420,14 @@ static struct lb_mainboard *lb_mainboard(struct lb_header *header)
 	memcpy(mainboard->strings + mainboard->part_number_idx,
 		mainboard_part_number, strlen(mainboard_part_number) + 1);
 
+	print_func_exit();
 	return mainboard;
 }
 
 #if CONFIG(USE_OPTION_TABLE)
 static struct cmos_checksum *lb_cmos_checksum(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_record *rec;
 	struct cmos_checksum *cmos_checksum;
 	rec = lb_new_record(header);
@@ -384,12 +441,14 @@ static struct cmos_checksum *lb_cmos_checksum(struct lb_header *header)
 	cmos_checksum->location = LB_CKS_LOC * 8;
 	cmos_checksum->type = CHECKSUM_PCBIOS;
 
+	print_func_exit();
 	return cmos_checksum;
 }
 #endif
 
 static void lb_strings(struct lb_header *header)
 {
+	print_func_entry();
 	static const struct {
 		uint32_t tag;
 		const char *string;
@@ -410,18 +469,23 @@ static void lb_strings(struct lb_header *header)
 		memcpy(rec->string, strings[i].string, len+1);
 	}
 
+	print_func_exit();
 }
 
 static void lb_record_version_timestamp(struct lb_header *header)
 {
+	print_func_entry();
 	struct lb_timestamp *rec;
 	rec = (struct lb_timestamp *)lb_new_record(header);
 	rec->tag = LB_TAG_VERSION_TIMESTAMP;
 	rec->size = sizeof(*rec);
 	rec->timestamp = coreboot_version_timestamp;
+	print_func_exit();
 }
 
-void __weak lb_board(struct lb_header *header) { /* NOOP */ }
+void __weak lb_board(struct lb_header *header) {
+	print_func_entry(); /* NOOP */ print_func_exit();
+}
 
 /*
  * It's possible that the system is using a SPI flash as the boot device,
@@ -429,11 +493,14 @@ void __weak lb_board(struct lb_header *header) { /* NOOP */ }
  * case don't provide any information as the correct information is
  * not known.
  */
-void __weak lb_spi_flash(struct lb_header *header) { /* NOOP */ }
+void __weak lb_spi_flash(struct lb_header *header) {
+	print_func_entry(); /* NOOP */ print_func_exit();
+}
 
 static struct lb_forward *lb_forward(struct lb_header *header,
 	struct lb_header *next_header)
 {
+	print_func_entry();
 	struct lb_record *rec;
 	struct lb_forward *forward;
 	rec = lb_new_record(header);
@@ -441,11 +508,13 @@ static struct lb_forward *lb_forward(struct lb_header *header,
 	forward->tag = LB_TAG_FORWARD;
 	forward->size = sizeof(*forward);
 	forward->forward = (uint64_t)(unsigned long)next_header;
+	print_func_exit();
 	return forward;
 }
 
 static unsigned long lb_table_fini(struct lb_header *head)
 {
+	print_func_entry();
 	struct lb_record *rec, *first_rec;
 	rec = lb_last_record(head);
 	if (head->table_entries)
@@ -459,11 +528,13 @@ static unsigned long lb_table_fini(struct lb_header *head)
 	printk(BIOS_DEBUG,
 	       "Wrote coreboot table at: %p, 0x%x bytes, checksum %x\n",
 	       head, head->table_bytes, head->table_checksum);
+	print_func_exit();
 	return (unsigned long)rec + rec->size;
 }
 
 size_t write_coreboot_forwarding_table(uintptr_t entry, uintptr_t target)
 {
+	print_func_entry();
 	struct lb_header *head;
 
 	printk(BIOS_DEBUG, "Writing table forward entry at %p\n",
@@ -472,11 +543,13 @@ size_t write_coreboot_forwarding_table(uintptr_t entry, uintptr_t target)
 	head = lb_table_init(entry);
 	lb_forward(head, (struct lb_header *)target);
 
+	print_func_exit();
 	return (uintptr_t)lb_table_fini(head) - entry;
 }
 
 static uintptr_t write_coreboot_table(uintptr_t rom_table_end)
 {
+	print_func_entry();
 	struct lb_header *head;
 
 	printk(BIOS_DEBUG, "Writing coreboot table at 0x%08lx\n",
@@ -564,11 +637,13 @@ static uintptr_t write_coreboot_table(uintptr_t rom_table_end)
 	cbmem_add_records_to_cbtable(head);
 
 	/* Remember where my valid memory ranges are */
+	print_func_exit();
 	return lb_table_fini(head);
 }
 
 void *write_tables(void)
 {
+	print_func_entry();
 	uintptr_t cbtable_start;
 	uintptr_t cbtable_end;
 	size_t cbtable_size;
@@ -578,6 +653,7 @@ void *write_tables(void)
 
 	if (!cbtable_start) {
 		printk(BIOS_ERR, "Could not add CBMEM for coreboot table.\n");
+		print_func_exit();
 		return NULL;
 	}
 
@@ -597,5 +673,6 @@ void *write_tables(void)
 
 	/* Print CBMEM sections */
 	cbmem_list();
+	print_func_exit();
 	return (void *)cbtable_start;
 }

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <types.h>
+#include <lib.h>
 
 /* For more details on implementation and usage please see the imd.h header. */
 
@@ -46,6 +47,7 @@ static void *relative_pointer(void *base, ssize_t offset)
 {
 	print_func_entry();
 	intptr_t b = (intptr_t)base;
+	printk(BIOS_ERR, "base is %#lx, offset %#lx, return %#lx\n", b, offset, b + offset);
 	b += offset;
 	print_func_exit();
 	return (void *)b;
@@ -61,6 +63,9 @@ static bool imd_root_pointer_valid(const struct imd_root_pointer *rp)
 static struct imd_root *imdr_root(const struct imdr *imdr)
 {
 	print_func_entry();
+	printk(BIOS_ERR, "imdr_root returns imdr %p and root %p and limit %#lx\n", imdr, imdr->r, imdr->limit);
+	if ((void *)imdr->limit > imdr->r)
+		hexdump(imdr->r, imdr->limit - (uintptr_t)imdr->r);
 	print_func_exit();
 	return imdr->r;
 }
@@ -665,6 +670,7 @@ int imd_region_used(struct imd *imd, void **base, size_t *size)
 	*base = low_addr;
 	*size = sz_used;
 
+	printk(BIOS_ERR, "imd %p, root %p, e %p, base @ %p, size @ %p, *base %p, *size %lx, \n",  imd, r, e, base, size, *base, *size);
 	print_func_exit();
 	return 0;
 }

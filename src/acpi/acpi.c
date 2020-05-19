@@ -1542,6 +1542,7 @@ unsigned long write_acpi_tables(unsigned long start)
 	dsdt_file = cbfs_boot_map_with_leak(
 				     CONFIG_CBFS_PREFIX "/dsdt.aml",
 				     CBFS_TYPE_RAW, &dsdt_size);
+	printk(BIOS_ERR, "back here is file  %p\n", dsdt_file);
 	if (!dsdt_file) {
 		printk(BIOS_ERR, "No DSDT file, skipping ACPI tables\n");
 		print_func_exit();
@@ -1555,7 +1556,9 @@ unsigned long write_acpi_tables(unsigned long start)
 		print_func_exit();
 		return current;
 	}
-
+printk(BIOS_ERR, "FUCK ACPI\n");
+		slic_file = NULL;
+	if (false) {
 	slic_file = cbfs_boot_map_with_leak(CONFIG_CBFS_PREFIX "/slic",
 				     CBFS_TYPE_RAW, &slic_size);
 	if (slic_file
@@ -1573,6 +1576,7 @@ unsigned long write_acpi_tables(unsigned long start)
 		memcpy(oem_table_id, ACPI_TABLE_CREATOR, 8);
 	}
 
+	}
 	printk(BIOS_INFO, "ACPI: Writing ACPI tables at %lx.\n", start);
 
 	/* We need at least an RSDP and an RSDT Table */

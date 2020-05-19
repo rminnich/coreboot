@@ -307,11 +307,15 @@ static ssize_t mdev_readat(const struct region_device *rd, void *b,
 	print_func_entry();
 	const struct mem_region_device *mdev;
 
-	printk(BIOS_SPEW, "rd is %p, \n", rd);
+	print_func_entry();
+	printk(BIOS_ERR, "b is %p, rd is %p, \n", b, rd);
 	mdev = container_of(rd, __typeof__(*mdev), rdev);
-	printk(BIOS_SPEW, "md is %p, \n", mdev);
+	printk(BIOS_ERR, "md is %p, \n", mdev);
 
-	printk(BIOS_SPEW, "mdev offset %lx size %lx mdev %p base %p dest %p \n", offset, size, mdev, mdev->base, b);
+	printk(BIOS_ERR, "memcpy mdev offset %lx size %lx mdev %p base %p dest %p \n", offset, size, mdev, mdev->base, b);
+	print_func_entry();
+	print_func_entry();
+	print_func_entry();
 	memcpy(b, &mdev->base[offset], size);
 
 	print_func_exit();

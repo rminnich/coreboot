@@ -25,41 +25,30 @@
 static size_t cbfs_next_offset(const struct region_device *cbfs,
 				const struct cbfsf *f)
 {
-	print_func_entry();
 	size_t offset;
 
-	if (f == NULL) {
-		print_func_exit();
+	if (f == NULL)
 		return 0;
-	}
 
 	/* The region_device objects store absolute offsets over the whole
 	 * region. Therefore a relative offset needs to be calculated. */
 	offset = rdev_relative_offset(cbfs, &f->data);
 	offset += region_device_sz(&f->data);
 
-	print_func_exit();
 	return ALIGN_UP(offset, CBFS_ALIGNMENT);
 }
 
 static int cbfs_end(const struct region_device *cbfs, size_t offset)
 {
-	print_func_entry();
-	if (offset >= region_device_sz(cbfs)) {
-		printk(BIOS_ERR, "CBFS: bad ending\n");
-		print_func_exit();
+	if (offset >= region_device_sz(cbfs))
 		return 1;
-	}
 
-	printk(BIOS_ERR, "CBFS: happy ending\n");
-	print_func_exit();
 	return 0;
 }
 
 int cbfs_for_each_file(const struct region_device *cbfs,
 			const struct cbfsf *prev, struct cbfsf *fh)
 {
-	print_func_entry();
 	size_t offset;
 
 	offset = cbfs_next_offset(cbfs, prev);
@@ -72,16 +61,12 @@ int cbfs_for_each_file(const struct region_device *cbfs,
 		 DEBUG("Checking offset %zx\n", offset);
 
 		/* End of region. */
-		if (cbfs_end(cbfs, offset)) {
-			print_func_exit();
+		if (cbfs_end(cbfs, offset))
 			return 1;
-		}
 
 		/* Can't read file. Nothing else to do but bail out. */
-		if (rdev_readat(cbfs, &file, offset, fsz) != fsz) {
-			printk(BIOS_ERR, "rdev_readat failed\n");
+		if (rdev_readat(cbfs, &file, offset, fsz) != fsz)
 			break;
-		}
 
 		if (memcmp(file.magic, CBFS_FILE_MAGIC, sizeof(file.magic))) {
 			offset++;
@@ -102,54 +87,42 @@ int cbfs_for_each_file(const struct region_device *cbfs,
 			break;
 
 		/* Success. */
-		print_func_exit();
 		return 0;
 	}
 
-	print_func_exit();
 	return -1;
 }
 
 size_t cbfs_for_each_attr(void *metadata, size_t metadata_size,
 			  size_t last_offset)
 {
-	print_func_entry();
 	struct cbfs_file_attribute *attr;
 
 	if (!last_offset) {
 		struct cbfs_file *file = metadata;
 		size_t start_offset = read_be32(&file->attributes_offset);
 		if (start_offset <= sizeof(struct cbfs_file) ||
-		    start_offset + sizeof(*attr) > metadata_size) {
-			print_func_exit();
+		    start_offset + sizeof(*attr) > metadata_size)
 			return 0;
-		}
-		print_func_exit();
 		return start_offset;
 	}
 
 	attr = metadata + last_offset;
 	size_t next_offset = last_offset + read_be32(&attr->len);
 
-	if (next_offset + sizeof(*attr) > metadata_size) {
-		print_func_exit();
+	if (next_offset + sizeof(*attr) > metadata_size)
 		return 0;
-	}
-	print_func_exit();
 	return next_offset;
 }
 
 int cbfsf_decompression_info(struct cbfsf *fh, uint32_t *algo, size_t *size)
 {
-	print_func_entry();
 	size_t metadata_size = region_device_sz(&fh->metadata);
 	void *metadata = rdev_mmap_full(&fh->metadata);
 	size_t offs = 0;
 
-	if (!metadata) {
-		print_func_exit();
+	if (!metadata)
 		return -1;
-	}
 
 	while ((offs = cbfs_for_each_attr(metadata, metadata_size, offs))) {
 		struct cbfs_file_attr_compression *attr = metadata + offs;
@@ -159,38 +132,31 @@ int cbfsf_decompression_info(struct cbfsf *fh, uint32_t *algo, size_t *size)
 		*algo = read_be32(&attr->compression);
 		*size = read_be32(&attr->decompressed_size);
 		rdev_munmap(&fh->metadata, metadata);
-		print_func_exit();
 		return 0;
 	}
 
 	*algo = CBFS_COMPRESS_NONE;
 	*size = region_device_sz(&fh->data);
 	rdev_munmap(&fh->metadata, metadata);
-	print_func_exit();
 	return 0;
 }
 
 int cbfsf_file_type(struct cbfsf *fh, uint32_t *ftype)
 {
-	print_func_entry();
 	const size_t sz = sizeof(*ftype);
 
 	if (rdev_readat(&fh->metadata, ftype,
-			offsetof(struct cbfs_file, type), sz) != sz) {
-		print_func_exit();
+			offsetof(struct cbfs_file, type), sz) != sz)
 		return -1;
-	}
 
 	*ftype = read_be32(ftype);
 
-	print_func_exit();
 	return 0;
 }
 
 int cbfs_locate(struct cbfsf *fh, const struct region_device *cbfs,
 		const char *name, uint32_t *type)
 {
-	print_func_entry();
 	struct cbfsf *prev;
 
 	LOG("Locating '%s'\n", name);
@@ -250,27 +216,22 @@ int cbfs_locate(struct cbfsf *fh, const struct region_device *cbfs,
 			region_device_sz(&fh->data));
 
 		/* Success. */
-		print_func_exit();
 		return 0;
 	}
 
 	LOG("'%s' not found.\n", name);
-	print_func_exit();
 	return -1;
 }
 
 static int cbfs_extend_hash_buffer(struct vb2_digest_context *ctx,
 					void *buf, size_t sz)
 {
-	print_func_entry();
-	print_func_exit();
 	return vb2_digest_extend(ctx, buf, sz);
 }
 
 static int cbfs_extend_hash(struct vb2_digest_context *ctx,
 				const struct region_device *rdev)
 {
-	print_func_entry();
 	uint8_t buffer[1024];
 	size_t sz_left;
 	size_t offset;
@@ -282,23 +243,18 @@ static int cbfs_extend_hash(struct vb2_digest_context *ctx,
 		int rv;
 		size_t block_sz = MIN(sz_left, sizeof(buffer));
 
-		if (rdev_readat(rdev, buffer, offset, block_sz) != block_sz) {
-			print_func_exit();
+		if (rdev_readat(rdev, buffer, offset, block_sz) != block_sz)
 			return VB2_ERROR_UNKNOWN;
-		}
 
 		rv = cbfs_extend_hash_buffer(ctx, buffer, block_sz);
 
-		if (rv) {
-			print_func_exit();
+		if (rv)
 			return rv;
-		}
 
 		sz_left -= block_sz;
 		offset += block_sz;
 	}
 
-	print_func_exit();
 	return VB2_SUCCESS;
 }
 
@@ -307,28 +263,22 @@ static int cbfs_extend_hash_with_offset(struct vb2_digest_context *ctx,
 					const struct region_device *p,
 					const struct region_device *c)
 {
-	print_func_entry();
 	int32_t soffset;
 	int rv;
 
 	soffset = rdev_relative_offset(p, c);
 
-	if (soffset < 0) {
-		print_func_exit();
+	if (soffset < 0)
 		return VB2_ERROR_UNKNOWN;
-	}
 
 	/* All offsets in big endian format. */
 	write_be32(&soffset, soffset);
 
 	rv = cbfs_extend_hash_buffer(ctx, &soffset, sizeof(soffset));
 
-	if (rv) {
-		print_func_exit();
+	if (rv)
 		return rv;
-	}
 
-	print_func_exit();
 	return cbfs_extend_hash(ctx, c);
 }
 
@@ -337,30 +287,22 @@ static int cbfs_extend_hash_with_offset(struct vb2_digest_context *ctx,
 static int cbfs_extend_hash_master_header(struct vb2_digest_context *ctx,
 					const struct region_device *cbfs)
 {
-	print_func_entry();
 	struct region_device rdev;
 	int rv;
 
-	if (rdev_chain(&rdev, cbfs, 0, sizeof(struct cbfs_header))) {
-		print_func_exit();
+	if (rdev_chain(&rdev, cbfs, 0, sizeof(struct cbfs_header)))
 		return VB2_ERROR_UNKNOWN;
-	}
 
 	rv = cbfs_extend_hash_with_offset(ctx, cbfs, &rdev);
 
-	if (rv) {
-		print_func_exit();
+	if (rv)
 		return rv;
-	}
 
 	/* Include potential relative offset at end of region. */
 	if (rdev_chain(&rdev, cbfs, region_device_sz(cbfs) - sizeof(int32_t),
-			sizeof(int32_t))) {
-		print_func_exit();
+			sizeof(int32_t)))
 		return VB2_ERROR_UNKNOWN;
-	}
 
-	print_func_exit();
 	return cbfs_extend_hash_with_offset(ctx, cbfs, &rdev);
 }
 
@@ -368,7 +310,6 @@ int cbfs_vb2_hash_contents(const struct region_device *cbfs,
 				enum vb2_hash_algorithm hash_alg, void *digest,
 				size_t digest_sz)
 {
-	print_func_entry();
 	struct vb2_digest_context ctx;
 	int rv;
 	struct cbfsf f;
@@ -377,16 +318,12 @@ int cbfs_vb2_hash_contents(const struct region_device *cbfs,
 
 	rv = vb2_digest_init(&ctx, hash_alg);
 
-	if (rv) {
-		print_func_exit();
+	if (rv)
 		return rv;
-	}
 
 	rv = cbfs_extend_hash_master_header(&ctx, cbfs);
-	if (rv) {
-		print_func_exit();
+	if (rv)
 		return rv;
-	}
 
 	prev = NULL;
 	fh = &f;
@@ -397,10 +334,8 @@ int cbfs_vb2_hash_contents(const struct region_device *cbfs,
 		rv = cbfs_for_each_file(cbfs, prev, fh);
 		prev = fh;
 
-		if (rv < 0) {
-			print_func_exit();
+		if (rv < 0)
 			return VB2_ERROR_UNKNOWN;
-		}
 
 		/* End of CBFS. */
 		if (rv > 0)
@@ -408,28 +343,21 @@ int cbfs_vb2_hash_contents(const struct region_device *cbfs,
 
 		rv = cbfs_extend_hash_with_offset(&ctx, cbfs, &fh->metadata);
 
-		if (rv) {
-			print_func_exit();
+		if (rv)
 			return rv;
-		}
 
 		/* Include data contents in hash if file is non-empty. */
-		if (cbfsf_file_type(fh, &ftype)) {
-			print_func_exit();
+		if (cbfsf_file_type(fh, &ftype))
 			return VB2_ERROR_UNKNOWN;
-		}
 
 		if (ftype == CBFS_TYPE_DELETED || ftype == CBFS_TYPE_DELETED2)
 			continue;
 
 		rv = cbfs_extend_hash_with_offset(&ctx, cbfs, &fh->data);
 
-		if (rv) {
-			print_func_exit();
+		if (rv)
 			return rv;
-		}
 	}
 
-	print_func_exit();
 	return vb2_digest_finalize(&ctx, digest, digest_sz);
 }

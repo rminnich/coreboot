@@ -1,47 +1,36 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
-
+#include <console/console.h>
 #include <cbmem.h>
 #include <arch/io.h>
 #include <arch/romstage.h>
+#include <cpu/cpu.h>
+#include <cpu/x86/msr.h>
+#include <cpu/amd/msr.h>
 #include "memory.h"
 
-#define CMOS_ADDR_PORT 0x70
-#define CMOS_DATA_PORT 0x71
+/* these are in mtrr.h and I'm not ready for that. */
+#define TOP_MEM		0xC001001Aul
+#define TOP_MEM2	0xC001001Dul
 
-#define HIGH_RAM_ADDR 0x35
-#define LOW_RAM_ADDR 0x34
+#define TOP_MEM_MASK			0x007fffff
+#define TOP_MEM_MASK_KB			(TOP_MEM_MASK >> 10)
 
-#define HIGH_HIGHRAM_ADDR 0x5d
-#define MID_HIGHRAM_ADDR 0x5c
-#define LOW_HIGHRAM_ADDR 0x5b
+static uintptr_t tolmk(void) {
+	msr_t msr;
+	uintptr_t tomk;
 
-unsigned long qemu_get_high_memory_size(void)
-{
-	unsigned long high;
-	outb(HIGH_HIGHRAM_ADDR, CMOS_ADDR_PORT);
-	high = ((unsigned long) inb(CMOS_DATA_PORT)) << 22;
-	outb(MID_HIGHRAM_ADDR, CMOS_ADDR_PORT);
-	high |= ((unsigned long) inb(CMOS_DATA_PORT)) << 14;
-	outb(LOW_HIGHRAM_ADDR, CMOS_ADDR_PORT);
-	high |= ((unsigned long) inb(CMOS_DATA_PORT)) << 6;
-	return high;
-}
-
-unsigned long qemu_get_memory_size(void)
-{
-	unsigned long tomk;
-	outb(HIGH_RAM_ADDR, CMOS_ADDR_PORT);
-	tomk = ((unsigned long) inb(CMOS_DATA_PORT)) << 14;
-	outb(LOW_RAM_ADDR, CMOS_ADDR_PORT);
-	tomk |= ((unsigned long) inb(CMOS_DATA_PORT)) << 6;
-	tomk += 16 * 1024;
+	msr = rdmsr(TOP_MEM);
+	printk(BIOS_ERR, "TOP %x:%x\n", msr.hi,msr.lo);
+	tomk = (msr.lo>>10)&TOP_MEM_MASK;
+	printk(BIOS_DEBUG, "QEMU: cmos: %lu MiB RAM below 4G.\n", tomk / 1024);
 	return tomk;
-}
 
+}
 void *cbmem_top_chipset(void)
 {
-	uintptr_t top = 0x4096 * 1024;
+	uintptr_t top = tolmk() * 1024;
 
+	printk(BIOS_ERR, "CBMEM_TOP_CHIPSET returns %#lx\n", top);
 	return (void *)top;
 }
 
@@ -49,3 +38,4 @@ void *cbmem_top_chipset(void)
 void fill_postcar_frame(struct postcar_frame *pcf)
 {
 }
+

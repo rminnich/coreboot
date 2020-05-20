@@ -61,7 +61,7 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 	msr = rdmsr(MMIO_CONF_BASE);
 	printk(BIOS_ERR, "c0010058 val %x:%x\n", msr.hi, msr.lo);
 	printk(BIOS_ERR, "Setting c0010058 to %x\n", CONFIG_MMCONF_BASE_ADDRESS);
-	msr.lo = CONFIG_MMCONF_BASE_ADDRESS;
+	msr.lo = CONFIG_MMCONF_BASE_ADDRESS | 0x21;
 	wrmsr(MMIO_CONF_BASE, msr);
 	msr = rdmsr(MMIO_CONF_BASE);
 	printk(BIOS_ERR, "c0010058 val %x:%x\n", msr.hi, msr.lo);

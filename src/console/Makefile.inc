@@ -24,6 +24,7 @@ romstage-y += vtxprintf.c printk.c vsprintf.c
 romstage-y += init.c console.c
 romstage-y += post.c
 romstage-y += die.c
+romstage-$(CONFIG_CONSOLE_DB) += db.c
 
 postcar-y += vtxprintf.c vsprintf.c
 postcar-$(CONFIG_POSTCAR_CONSOLE) += printk.c

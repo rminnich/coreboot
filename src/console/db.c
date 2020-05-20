@@ -8,6 +8,14 @@
 #include <cpu/cpu.h>
 #include <cpu/x86/msr.h>
 #include <cpu/amd/msr.h>
+#include <lib.h>
+
+#include <device/cardbus.h>
+#include <device/device.h>
+#include <device/pci.h>
+#include <device/pci_ids.h>
+#include <device/pcix.h>
+#include <device/pciexp.h>
 
 struct cmd {
 	const char *name;
@@ -16,7 +24,16 @@ struct cmd {
 	void (*f)(int nargc, uint64_t *args);
 };
 
-static void help(int nargs, uint64_t *args);
+static void do_drivers(int argc, uint64_t *args)
+{
+	struct pci_driver *driver;
+	printk(BIOS_ERR, "There are %ld drivers\n", &_epci_drivers[0] - &_pci_drivers[0]);
+	for (driver = &_pci_drivers[0]; driver != &_epci_drivers[0]; driver++) {
+		printk(BIOS_ERR, "[%04x/%04x] %sops\n",
+		       driver->vendor, driver->device,
+		       (driver->ops->scan_bus ? "bus " : ""));
+		}
+}
 
 static void do_cpuid(int argc, uint64_t *args)
 {
@@ -45,6 +62,12 @@ static void do_mem(int argc, uint64_t *args)
 	uint32_t *a = (uint32_t*) (uint32_t)(args[0]);
 	v = *a;
 	printk(BIOS_ERR, "mem %p:%#x\r\n", a, v);
+}
+
+static void do_xmem(int argc, uint64_t *args)
+{
+	uint32_t *a = (uint32_t*) (uint32_t)(args[0]);
+	hexdump(a, args[1]);
 }
 
 static void do_wrmsr(int argc, uint64_t *args)
@@ -102,28 +125,6 @@ static void do_outb(int argc, uint64_t *args)
 	uint8_t v = args[1];
 	outb(v, a);
 }
-
-static struct cmd cmds[] = {
-	{"?", "help", 0, help,},
-	{"inl", "inl address", 1, do_inl},
-	{"inw", "inw address", 1, do_inw,},
-	{"inb", "inb address", 1, do_inb,},
-	{"outl", "outl address data", 2, do_outl,},
-	{"outw", "outw address data", 2, do_outw,},
-	{"outb", "outb address data", 2, do_outb,},
-	{"cpuid", "cpuid_get_cpuid from coreboot2", 1, do_cpuid,},
-	{"msr", "read an MSR", 1, do_rdmsr,},
-	{"wmsr", "write an MSR", 2, do_wrmsr,},
-	{"mem", "read mem", 1, do_mem,},
-};
-
-static void help(int nargc, uint64_t *args)
-{
-	for (int i = 0; i < sizeof(cmds)/sizeof(cmds[0]); i++) {
-		printk(BIOS_ERR, "%s: %s, %d args\r\n", cmds[i].name, cmds[i].usage, cmds[i].nargs);
-	}
-}
-
 static uint64_t string2bin(char *s)
 {
 	uint64_t val = 0;
@@ -146,6 +147,20 @@ static uint64_t string2bin(char *s)
 /* Tawk to me */
 void db(void)
 {
+	struct cmd cmds[] = {
+	{"inl", "inl address", 1, do_inl},
+	{"inw", "inw address", 1, do_inw,},
+	{"inb", "inb address", 1, do_inb,},
+	{"outl", "outl address data", 2, do_outl,},
+	{"outw", "outw address data", 2, do_outw,},
+	{"outb", "outb address data", 2, do_outb,},
+	{"cpuid", "cpuid_get_cpuid from coreboot2", 1, do_cpuid,},
+	{"msr", "read an MSR", 1, do_rdmsr,},
+	{"wmsr", "write an MSR", 2, do_wrmsr,},
+	{"mem", "read mem", 1, do_mem,},
+	{"xmem", "x mem", 2, do_xmem,},
+	{"dr", "show drivers", 0, do_drivers,},
+};
 	struct cmd *c;
 	uint8_t b;
 	int l, ll, nargs;
@@ -188,7 +203,9 @@ void db(void)
 				line[i] = 0;
 		}
 		if (nargs == 0) {
-			help(0, NULL);
+			for (int i = 0; i < sizeof(cmds)/sizeof(cmds[0]); i++) {
+				printk(BIOS_ERR, "%s: %s, %d args\r\n", cmds[i].name, cmds[i].usage, cmds[i].nargs);
+			}
 			continue;
 		}
 
@@ -208,7 +225,9 @@ void db(void)
 		if (! c) {
 			printk(BIOS_ERR, "%s: not found", parms[0]);
 			printk(BIOS_ERR, "\r\n");
-			cmds[0].f(0, NULL);
+			for (int i = 0; i < sizeof(cmds)/sizeof(cmds[0]); i++) {
+				printk(BIOS_ERR, "%s: %s, %d args\r\n", cmds[i].name, cmds[i].usage, cmds[i].nargs);
+			}
 			continue;
 		}
 		if (nargs-1 != c->nargs){

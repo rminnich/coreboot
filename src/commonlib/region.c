@@ -1,197 +1,148 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
-#include <console/console.h>
+
 #include <commonlib/helpers.h>
 #include <commonlib/region.h>
 #include <string.h>
 
 int region_is_subregion(const struct region *p, const struct region *c)
 {
-	print_func_entry();
-	if (region_offset(c) < region_offset(p)) {
-		print_func_exit();
+	if (region_offset(c) < region_offset(p))
 		return 0;
-	}
 
-	if (region_end(c) > region_end(p)) {
-		print_func_exit();
+	if (region_end(c) > region_end(p))
 		return 0;
-	}
 
-	if (region_end(c) < region_offset(c)) {
-		print_func_exit();
+	if (region_end(c) < region_offset(c))
 		return 0;
-	}
 
-	print_func_exit();
 	return 1;
 }
 
 static int normalize_and_ok(const struct region *outer, struct region *inner)
 {
-	print_func_entry();
 	inner->offset += region_offset(outer);
-	print_func_exit();
 	return region_is_subregion(outer, inner);
 }
 
 static const struct region_device *rdev_root(const struct region_device *rdev)
 {
-	print_func_entry();
-	if (rdev->root == NULL) {
-		print_func_exit();
+	if (rdev->root == NULL)
 		return rdev;
-	}
-	print_func_exit();
 	return rdev->root;
 }
 
 ssize_t rdev_relative_offset(const struct region_device *p,
 				const struct region_device *c)
 {
-	print_func_entry();
-	if (rdev_root(p) != rdev_root(c)) {
-		print_func_exit();
+	if (rdev_root(p) != rdev_root(c))
 		return -1;
-	}
 
-	if (!region_is_subregion(&p->region, &c->region)) {
-		print_func_exit();
+	if (!region_is_subregion(&p->region, &c->region))
 		return -1;
-	}
 
-	print_func_exit();
 	return region_device_offset(c) - region_device_offset(p);
 }
 
 void *rdev_mmap(const struct region_device *rd, size_t offset, size_t size)
 {
-	print_func_entry();
 	const struct region_device *rdev;
 	struct region req = {
 		.offset = offset,
 		.size = size,
 	};
 
-	if (!normalize_and_ok(&rd->region, &req)) {
-		print_func_exit();
+	if (!normalize_and_ok(&rd->region, &req))
 		return NULL;
-	}
 
 	rdev = rdev_root(rd);
 
-	if (rdev->ops->mmap == NULL) {
-		print_func_exit();
+	if (rdev->ops->mmap == NULL)
 		return NULL;
-	}
 
-	print_func_exit();
 	return rdev->ops->mmap(rdev, req.offset, req.size);
 }
 
 int rdev_munmap(const struct region_device *rd, void *mapping)
 {
-	print_func_entry();
 	const struct region_device *rdev;
 
 	rdev = rdev_root(rd);
 
-	if (rdev->ops->munmap == NULL) {
-		print_func_exit();
+	if (rdev->ops->munmap == NULL)
 		return -1;
-	}
 
-	print_func_exit();
 	return rdev->ops->munmap(rdev, mapping);
 }
 
 ssize_t rdev_readat(const struct region_device *rd, void *b, size_t offset,
 			size_t size)
 {
-	print_func_entry();
 	const struct region_device *rdev;
 	struct region req = {
 		.offset = offset,
 		.size = size,
 	};
 
-	if (!normalize_and_ok(&rd->region, &req)) {
-		print_func_exit();
+	if (!normalize_and_ok(&rd->region, &req))
 		return -1;
-	}
 
 	rdev = rdev_root(rd);
 
-	print_func_exit();
 	return rdev->ops->readat(rdev, b, req.offset, req.size);
 }
 
 ssize_t rdev_writeat(const struct region_device *rd, const void *b,
 			size_t offset, size_t size)
 {
-	print_func_entry();
 	const struct region_device *rdev;
 	struct region req = {
 		.offset = offset,
 		.size = size,
 	};
 
-	if (!normalize_and_ok(&rd->region, &req)) {
-		print_func_exit();
+	if (!normalize_and_ok(&rd->region, &req))
 		return -1;
-	}
 
 	rdev = rdev_root(rd);
 
-	if (rdev->ops->writeat == NULL) {
-		print_func_exit();
+	if (rdev->ops->writeat == NULL)
 		return -1;
-	}
 
-	print_func_exit();
 	return rdev->ops->writeat(rdev, b, req.offset, req.size);
 }
 
 ssize_t rdev_eraseat(const struct region_device *rd, size_t offset,
 			size_t size)
 {
-	print_func_entry();
 	const struct region_device *rdev;
 	struct region req = {
 		.offset = offset,
 		.size = size,
 	};
 
-	if (!normalize_and_ok(&rd->region, &req)) {
-		print_func_exit();
+	if (!normalize_and_ok(&rd->region, &req))
 		return -1;
-	}
 
 	rdev = rdev_root(rd);
 
 	/* If the eraseat ptr is NULL we assume that the erase
 	 * function was completed successfully. */
-	if (rdev->ops->eraseat == NULL) {
-		print_func_exit();
+	if (rdev->ops->eraseat == NULL)
 		return size;
-	}
 
-	print_func_exit();
 	return rdev->ops->eraseat(rdev, req.offset, req.size);
 }
 
 int rdev_chain(struct region_device *child, const struct region_device *parent,
 		size_t offset, size_t size)
 {
-	print_func_entry();
 	struct region req = {
 		.offset = offset,
 		.size = size,
 	};
 
-	if (!normalize_and_ok(&parent->region, &req)) {
-		print_func_exit();
+	if (!normalize_and_ok(&parent->region, &req))
 		return -1;
-	}
 
 	/* Keep track of root region device. Note the offsets are relative
 	 * to the root device. */
@@ -200,34 +151,27 @@ int rdev_chain(struct region_device *child, const struct region_device *parent,
 	child->region.offset = req.offset;
 	child->region.size = req.size;
 
-	print_func_exit();
 	return 0;
 }
 
 static void mem_region_device_init(struct mem_region_device *mdev,
 		const struct region_device_ops *ops, void *base, size_t size)
 {
-	print_func_entry();
 	memset(mdev, 0, sizeof(*mdev));
 	mdev->base = base;
 	mdev->rdev.ops = ops;
 	mdev->rdev.region.size = size;
-	print_func_exit();
 }
 
 void mem_region_device_ro_init(struct mem_region_device *mdev, void *base,
 				size_t size)
 {
-	print_func_entry();
-	print_func_exit();
 	return mem_region_device_init(mdev, &mem_rdev_ro_ops, base, size);
 }
 
 void mem_region_device_rw_init(struct mem_region_device *mdev, void *base,
 		size_t size)
 {
-	print_func_entry();
-	print_func_exit();
 	return mem_region_device_init(mdev, &mem_rdev_rw_ops, base, size);
 }
 
@@ -235,13 +179,11 @@ void region_device_init(struct region_device *rdev,
 			const struct region_device_ops *ops, size_t offset,
 			size_t size)
 {
-	print_func_entry();
 	memset(rdev, 0, sizeof(*rdev));
 	rdev->root = NULL;
 	rdev->ops = ops;
 	rdev->region.offset = offset;
 	rdev->region.size = size;
-	print_func_exit();
 }
 
 static void xlate_region_device_init(struct xlate_region_device *xdev,
@@ -250,13 +192,11 @@ static void xlate_region_device_init(struct xlate_region_device *xdev,
 			size_t sub_offset, size_t sub_size,
 			size_t parent_size)
 {
-	print_func_entry();
 	memset(xdev, 0, sizeof(*xdev));
 	xdev->access_dev = access_dev;
 	xdev->sub_region.offset = sub_offset;
 	xdev->sub_region.size = sub_size;
 	region_device_init(&xdev->rdev, ops, 0, parent_size);
-	print_func_exit();
 }
 
 void xlate_region_device_ro_init(struct xlate_region_device *xdev,
@@ -264,10 +204,8 @@ void xlate_region_device_ro_init(struct xlate_region_device *xdev,
 			      size_t sub_offset, size_t sub_size,
 			      size_t parent_size)
 {
-	print_func_entry();
 	xlate_region_device_init(xdev, &xlate_rdev_ro_ops, access_dev,
 			sub_offset, sub_size, parent_size);
-	print_func_exit();
 }
 
 void xlate_region_device_rw_init(struct xlate_region_device *xdev,
@@ -275,78 +213,59 @@ void xlate_region_device_rw_init(struct xlate_region_device *xdev,
 			      size_t sub_offset, size_t sub_size,
 			      size_t parent_size)
 {
-	print_func_entry();
 	xlate_region_device_init(xdev, &xlate_rdev_rw_ops, access_dev,
 			sub_offset, sub_size, parent_size);
-	print_func_exit();
 }
 
 static void *mdev_mmap(const struct region_device *rd, size_t offset,
 			size_t size __unused)
 {
-	print_func_entry();
 	const struct mem_region_device *mdev;
 
 	mdev = container_of(rd, __typeof__(*mdev), rdev);
 
-	print_func_exit();
 	return &mdev->base[offset];
 }
 
 static int mdev_munmap(const struct region_device *rd __unused,
 			void *mapping __unused)
 {
-	print_func_entry();
-	print_func_exit();
 	return 0;
 }
 
 static ssize_t mdev_readat(const struct region_device *rd, void *b,
 				size_t offset, size_t size)
 {
-	print_func_entry();
 	const struct mem_region_device *mdev;
 
-	print_func_entry();
-	printk(BIOS_ERR, "b is %p, rd is %p, \n", b, rd);
 	mdev = container_of(rd, __typeof__(*mdev), rdev);
-	printk(BIOS_ERR, "md is %p, \n", mdev);
 
-	printk(BIOS_ERR, "memcpy mdev offset %lx size %lx mdev %p base %p dest %p \n", offset, size, mdev, mdev->base, b);
-	print_func_entry();
-	print_func_entry();
-	print_func_entry();
 	memcpy(b, &mdev->base[offset], size);
 
-	print_func_exit();
 	return size;
 }
 
 static ssize_t mdev_writeat(const struct region_device *rd, const void *b,
 				size_t offset, size_t size)
 {
-	print_func_entry();
 	const struct mem_region_device *mdev;
 
 	mdev = container_of(rd, __typeof__(*mdev), rdev);
 
 	memcpy(&mdev->base[offset], b, size);
 
-	print_func_exit();
 	return size;
 }
 
 static ssize_t mdev_eraseat(const struct region_device *rd, size_t offset,
 				size_t size)
 {
-	print_func_entry();
 	const struct mem_region_device *mdev;
 
 	mdev = container_of(rd, __typeof__(*mdev), rdev);
 
 	memset(&mdev->base[offset], 0, size);
 
-	print_func_exit();
 	return size;
 }
 
@@ -367,15 +286,12 @@ const struct region_device_ops mem_rdev_rw_ops = {
 void mmap_helper_device_init(struct mmap_helper_region_device *mdev,
 				void *cache, size_t cache_size)
 {
-	print_func_entry();
 	mem_pool_init(&mdev->pool, cache, cache_size);
-	print_func_exit();
 }
 
 void *mmap_helper_rdev_mmap(const struct region_device *rd, size_t offset,
 				size_t size)
 {
-	print_func_entry();
 	struct mmap_helper_region_device *mdev;
 	void *mapping;
 
@@ -383,38 +299,31 @@ void *mmap_helper_rdev_mmap(const struct region_device *rd, size_t offset,
 
 	mapping = mem_pool_alloc(&mdev->pool, size);
 
-	if (mapping == NULL) {
-		print_func_exit();
+	if (mapping == NULL)
 		return NULL;
-	}
 
 	if (rd->ops->readat(rd, mapping, offset, size) != size) {
 		mem_pool_free(&mdev->pool, mapping);
-		print_func_exit();
 		return NULL;
 	}
 
-	print_func_exit();
 	return mapping;
 }
 
 int mmap_helper_rdev_munmap(const struct region_device *rd, void *mapping)
 {
-	print_func_entry();
 	struct mmap_helper_region_device *mdev;
 
 	mdev = container_of((void *)rd, __typeof__(*mdev), rdev);
 
 	mem_pool_free(&mdev->pool, mapping);
 
-	print_func_exit();
 	return 0;
 }
 
 static void *xlate_mmap(const struct region_device *rd, size_t offset,
 			size_t size)
 {
-	print_func_entry();
 	const struct xlate_region_device *xldev;
 	struct region req = {
 		.offset = offset,
@@ -423,32 +332,26 @@ static void *xlate_mmap(const struct region_device *rd, size_t offset,
 
 	xldev = container_of(rd, __typeof__(*xldev), rdev);
 
-	if (!region_is_subregion(&xldev->sub_region, &req)) {
-		print_func_exit();
+	if (!region_is_subregion(&xldev->sub_region, &req))
 		return NULL;
-	}
 
 	offset -= region_offset(&xldev->sub_region);
 
-	print_func_exit();
 	return rdev_mmap(xldev->access_dev, offset, size);
 }
 
 static int xlate_munmap(const struct region_device *rd, void *mapping)
 {
-	print_func_entry();
 	const struct xlate_region_device *xldev;
 
 	xldev = container_of(rd, __typeof__(*xldev), rdev);
 
-	print_func_exit();
 	return rdev_munmap(xldev->access_dev, mapping);
 }
 
 static ssize_t xlate_readat(const struct region_device *rd, void *b,
 				size_t offset, size_t size)
 {
-	print_func_entry();
 	struct region req = {
 		.offset = offset,
 		.size = size,
@@ -457,21 +360,17 @@ static ssize_t xlate_readat(const struct region_device *rd, void *b,
 
 	xldev = container_of(rd, __typeof__(*xldev), rdev);
 
-	if (!region_is_subregion(&xldev->sub_region, &req)) {
-		print_func_exit();
+	if (!region_is_subregion(&xldev->sub_region, &req))
 		return -1;
-	}
 
 	offset -= region_offset(&xldev->sub_region);
 
-	print_func_exit();
 	return rdev_readat(xldev->access_dev, b, offset, size);
 }
 
 static ssize_t xlate_writeat(const struct region_device *rd, const void *b,
 				size_t offset, size_t size)
 {
-	print_func_entry();
 	struct region req = {
 		.offset = offset,
 		.size = size,
@@ -480,21 +379,17 @@ static ssize_t xlate_writeat(const struct region_device *rd, const void *b,
 
 	xldev = container_of(rd, __typeof__(*xldev), rdev);
 
-	if (!region_is_subregion(&xldev->sub_region, &req)) {
-		print_func_exit();
+	if (!region_is_subregion(&xldev->sub_region, &req))
 		return -1;
-	}
 
 	offset -= region_offset(&xldev->sub_region);
 
-	print_func_exit();
 	return rdev_writeat(xldev->access_dev, b, offset, size);
 }
 
 static ssize_t xlate_eraseat(const struct region_device *rd,
 				size_t offset, size_t size)
 {
-	print_func_entry();
 	struct region req = {
 		.offset = offset,
 		.size = size,
@@ -503,14 +398,11 @@ static ssize_t xlate_eraseat(const struct region_device *rd,
 
 	xldev = container_of(rd, __typeof__(*xldev), rdev);
 
-	if (!region_is_subregion(&xldev->sub_region, &req)) {
-		print_func_exit();
+	if (!region_is_subregion(&xldev->sub_region, &req))
 		return -1;
-	}
 
 	offset -= region_offset(&xldev->sub_region);
 
-	print_func_exit();
 	return rdev_eraseat(xldev->access_dev, offset, size);
 }
 
@@ -532,59 +424,49 @@ const struct region_device_ops xlate_rdev_rw_ops = {
 static void *incoherent_mmap(const struct region_device *rd, size_t offset,
 				size_t size)
 {
-	print_func_entry();
 	const struct incoherent_rdev *irdev;
 
 	irdev = container_of(rd, const struct incoherent_rdev, rdev);
 
-	print_func_exit();
 	return rdev_mmap(irdev->read, offset, size);
 }
 
 static int incoherent_munmap(const struct region_device *rd, void *mapping)
 {
-	print_func_entry();
 	const struct incoherent_rdev *irdev;
 
 	irdev = container_of(rd, const struct incoherent_rdev, rdev);
 
-	print_func_exit();
 	return rdev_munmap(irdev->read, mapping);
 }
 
 static ssize_t incoherent_readat(const struct region_device *rd, void *b,
 				size_t offset, size_t size)
 {
-	print_func_entry();
 	const struct incoherent_rdev *irdev;
 
 	irdev = container_of(rd, const struct incoherent_rdev, rdev);
 
-	print_func_exit();
 	return rdev_readat(irdev->read, b, offset, size);
 }
 
 static ssize_t incoherent_writeat(const struct region_device *rd, const void *b,
 			size_t offset, size_t size)
 {
-	print_func_entry();
 	const struct incoherent_rdev *irdev;
 
 	irdev = container_of(rd, const struct incoherent_rdev, rdev);
 
-	print_func_exit();
 	return rdev_writeat(irdev->write, b, offset, size);
 }
 
 static ssize_t incoherent_eraseat(const struct region_device *rd, size_t offset,
 				size_t size)
 {
-	print_func_entry();
 	const struct incoherent_rdev *irdev;
 
 	irdev = container_of(rd, const struct incoherent_rdev, rdev);
 
-	print_func_exit();
 	return rdev_eraseat(irdev->write, offset, size);
 }
 
@@ -601,13 +483,10 @@ const struct region_device *incoherent_rdev_init(struct incoherent_rdev *irdev,
 				const struct region_device *read,
 				const struct region_device *write)
 {
-	print_func_entry();
 	const size_t size = region_sz(r);
 
-	if (size != region_device_sz(read) || size != region_device_sz(write)) {
-		print_func_exit();
+	if (size != region_device_sz(read) || size != region_device_sz(write))
 		return NULL;
-	}
 
 	/* The region is represented as offset 0 to size. That way, the generic
 	 * rdev operations can be called on the read or write implementation
@@ -617,6 +496,5 @@ const struct region_device *incoherent_rdev_init(struct incoherent_rdev *irdev,
 	irdev->read = read;
 	irdev->write = write;
 
-	print_func_exit();
 	return &irdev->rdev;
 }

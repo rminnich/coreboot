@@ -9,5 +9,4 @@ postcar-y += exit_car.S
 
 ramstage-y += fw_cfg.c
 ramstage-y += memmap.c
-ramstage-y += northbridge.c
 

@@ -27,7 +27,9 @@ void acpi_create_gnvs(global_nvs_t *gnvs)
 void acpi_create_fadt(acpi_fadt_t *fadt, acpi_facs_t *facs, void *dsdt)
 {
 	acpi_header_t *header = &(fadt->header);
-	u16 pmbase = pci_read_config16(pcidev_on_root(0x1f, 0), 0x40) & 0xfffe;
+	u16 pmbase = 0;
+
+	// TODO: find pmbase
 	memset((void *) fadt, 0, sizeof(acpi_fadt_t));
 	memcpy(header->signature, "FACP", 4);
 	header->length = sizeof(acpi_fadt_t);

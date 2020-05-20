@@ -3,24 +3,28 @@
 #include <console/console.h>
 #include <device/device.h>
 #include <device/pci.h>
+#include <reset.h>
 #include <device/pci_ops.h>
 #include <pc80/keyboard.h>
 #include <cpu/cpu.h>
 #include <cpu/x86/msr.h>
 #include <cpu/amd/msr.h>
 
-static void qemu_nb_init(struct device *dev)
+static void romepsp_nb_init(struct device *dev)
 {
 	print_func_entry();
 
+	printk(BIOS_ERR, "==============================================> \n");
+	printk(BIOS_ERR, "HI HTEREER\n");
 	print_func_exit();
 }
 
-static void qemu_nb_read_resources(struct device *dev)
+static void romepsp_nb_read_resources(struct device *dev)
 {
 	print_func_entry();
 	pci_dev_read_resources(dev);
 
+	printk(BIOS_ERR, "==============================================> \n");
 	/* reserve mmconfig */
 	fixed_mem_resource(dev, 2, CONFIG_MMCONF_BASE_ADDRESS >> 10, 0x10000000 >> 10,
 			   IORESOURCE_RESERVE);
@@ -28,12 +32,27 @@ static void qemu_nb_read_resources(struct device *dev)
 	print_func_exit();
 }
 
+static void nb_pci_dev_set_resources(struct device *dev)
+{
+	print_func_entry();
+	printk(BIOS_ERR, "==============================================> \n");
+	pci_dev_set_resources(dev);
+	print_func_exit();
+}
+
+static void nb_pci_dev_enable_resources(struct device *dev)
+{
+	print_func_entry();
+	printk(BIOS_ERR, "==============================================> \n");
+	pci_dev_set_resources(dev);
+	print_func_exit();
+}
 
 static struct device_operations nb_operations = {
-	.read_resources   = qemu_nb_read_resources,
-	.set_resources    = pci_dev_set_resources,
-	.enable_resources = pci_dev_enable_resources,
-	.init             = qemu_nb_init,
+	.read_resources   = romepsp_nb_read_resources,
+	.set_resources    = nb_pci_dev_set_resources,
+	.enable_resources = nb_pci_dev_enable_resources,
+	.init             = romepsp_nb_init,
 };
 
 static const struct pci_driver nb_driver __pci_driver = {
@@ -94,3 +113,10 @@ static void mainboard_enable(struct device *dev)
 struct chip_operations mainboard_ops = {
 	.enable_dev = mainboard_enable,
 };
+
+void do_board_reset(void)
+{
+	print_func_entry();
+	die("reset");
+	print_func_exit();
+}

@@ -49,7 +49,6 @@ static const struct pci_driver nb_driver __pci_driver = {
 #define TOP_MEM_MASK			0x007fffff
 #define TOP_MEM_MASK_KB			(TOP_MEM_MASK >> 10)
 
-
 static void mainboard_amd_romepsp_enable(struct device *dev)
 {
 	msr_t msr;
@@ -61,8 +60,8 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 
 	msr = rdmsr(MMIO_CONF_BASE);
 	printk(BIOS_ERR, "c0010058 val %x:%x\n", msr.hi, msr.lo);
-	printk(BIOS_ERR, "Setting c0010058 to %x\n", msr.lo | 0xf8000001);
-	msr.lo |= 0xf8000001;
+	printk(BIOS_ERR, "Setting c0010058 to %x\n", CONFIG_MMCONF_BASE_ADDRESS);
+	msr.lo = CONFIG_MMCONF_BASE_ADDRESS;
 	wrmsr(MMIO_CONF_BASE, msr);
 	msr = rdmsr(MMIO_CONF_BASE);
 	printk(BIOS_ERR, "c0010058 val %x:%x\n", msr.hi, msr.lo);

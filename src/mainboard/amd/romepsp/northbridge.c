@@ -99,7 +99,7 @@ static void cpu_pci_domain_read_resources(struct device *dev)
 }
 
 #if CONFIG(HAVE_ACPI_TABLES)
-static const char *qemu_acpi_name(const struct device *dev)
+static const char *amd_romepsp_acpi_name(const struct device *dev)
 {
 	print_func_entry();
 	if (dev->path.type == DEVICE_PATH_DOMAIN) {
@@ -125,7 +125,7 @@ static struct device_operations pci_domain_ops = {
 	.get_smbios_data	= qemu_get_smbios_data,
 #endif
 #if CONFIG(HAVE_ACPI_TABLES)
-	.acpi_name		= qemu_acpi_name,
+	.acpi_name		= amd_romepsp_acpi_name,
 #endif
 };
 
@@ -149,8 +149,8 @@ static void cpu_bus_scan(struct device *bus)
 	}
 
 	/*
-	 * TODO: This only handles the simple "qemu -smp $nr" case
-	 * correctly.  qemu also allows to specify the number of
+	 * TODO: This only handles the simple case
+	 * (in)correctly.  qemu also allows to specify the number of
 	 * cores, threads & sockets.
 	 */
 	printk(BIOS_INFO, "RomePSP: max_cpus is %d\n", max_cpus);

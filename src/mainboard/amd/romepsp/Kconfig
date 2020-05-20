@@ -52,7 +52,7 @@ config MAINBOARD_PART_NUMBER
 
 config MMCONF_BASE_ADDRESS
 	hex
-	default 0xb0000000
+	default 0xe0000000
 
 # fw_cfg tables can be larger than the default when TPM is enabled
 config MAX_ACPI_TABLE_SIZE_KB

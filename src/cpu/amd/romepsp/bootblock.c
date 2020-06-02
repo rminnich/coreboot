@@ -8,6 +8,7 @@ asmlinkage void bootblock_c_entry_bist(uint64_t base_timestamp, uint32_t bist)
 {
 	print_func_entry();
 	post_code(0x05);
+	while (1);
 
 	/* Halt if there was a built in self test failure */
 	if (bist) {

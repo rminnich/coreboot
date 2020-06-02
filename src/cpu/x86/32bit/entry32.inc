@@ -49,3 +49,5 @@ __protected_start:
 
 	/* Restore the BIST value to %eax */
 	movl	%ebp, %eax
+	1: mov $0x32, %al
+	outb %al, $0x80

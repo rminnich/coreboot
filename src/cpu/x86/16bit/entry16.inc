@@ -37,6 +37,10 @@
 .type _start16bit, @function
 
 _start16bit:
+	movb $0x31, %al
+1: outb %al, $0x80
+//jmp 1b
+	
 	cli
 	/* Save the BIST result */
 	movl	%eax, %ebp

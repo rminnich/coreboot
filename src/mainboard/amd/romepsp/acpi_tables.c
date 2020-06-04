@@ -22,7 +22,6 @@ void acpi_create_gnvs(global_nvs_t *gnvs)
 	gnvs->cmap = 0x01;
 	gnvs->cmbp = 0x01;
 }
-#endif
 
 void acpi_create_fadt(acpi_fadt_t *fadt, acpi_facs_t *facs, void *dsdt)
 {
@@ -192,3 +191,4 @@ unsigned long acpi_fill_mcfg(unsigned long current)
 					     reg & 0xf0000000, 0x0, 0x0, 255);
 	return current;
 }
+#endif

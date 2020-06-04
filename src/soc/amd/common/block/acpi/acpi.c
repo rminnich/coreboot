@@ -13,6 +13,7 @@
 
 void poweroff(void)
 {
+#if 0
 	acpi_write32(MMIO_ACPI_PM1_CNT_BLK,
 			  (SLP_TYP_S5 << SLP_TYP_SHIFT) | SLP_EN);
 
@@ -23,6 +24,7 @@ void poweroff(void)
 	 */
 	if (!ENV_SMM)
 		halt();
+#endif
 }
 
 static uint16_t reset_pm1_status(void)
@@ -107,8 +109,8 @@ static void save_sws(uint16_t pm1_status)
 	sws->gpe0_sts = reg32;
 	sws->gpe0_en = acpi_read32(MMIO_ACPI_GPE0_EN);
 	reg16 = acpi_read16(MMIO_ACPI_PM1_CNT_BLK);
-	reg16 &= SLP_TYP;
-	sws->wake_from = reg16 >> SLP_TYP_SHIFT;
+	reg16 &= 0; //SLP_TYP;
+	//sws->wake_from = reg16 >> SLP_TYP_SHIFT;
 }
 
 void acpi_clear_pm1_status(void)
@@ -122,7 +124,7 @@ void acpi_clear_pm1_status(void)
 
 int acpi_get_sleep_type(void)
 {
-	return acpi_sleep_from_pm1(acpi_read16(MMIO_ACPI_PM1_CNT_BLK));
+  return 0; //acpi_sleep_from_pm1(acpi_read16(MMIO_ACPI_PM1_CNT_BLK));
 }
 
 int platform_is_resuming(void)
@@ -140,8 +142,8 @@ void set_pm1cnt_s5(void)
 	uint16_t pm1;
 
 	pm1 = acpi_read16(MMIO_ACPI_PM1_CNT_BLK);
-	pm1 &= ~SLP_TYP;
-	pm1 |= SLP_TYP_S5 << SLP_TYP_SHIFT;
+	//pm1 &= ~SLP_TYP;
+	//pm1 |= SLP_TYP_S5 << SLP_TYP_SHIFT;
 	acpi_write16(MMIO_ACPI_PM1_CNT_BLK, pm1);
 }
 

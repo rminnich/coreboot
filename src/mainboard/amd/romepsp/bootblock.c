@@ -9,26 +9,90 @@
 #include <cpu/x86/msr.h>
 #include <cpu/amd/msr.h>
 #include <console/console.h>
+#include <console/uart.h>
 #include <drivers/uart/uart8250reg.h>
 #include <superio/aspeed/ast2400/ast2400.h>
 #include <superio/aspeed/common/aspeed.h>
 
-static uint8_t com_to_ast_sio(uint8_t com)
+#include <commonlib/helpers.h>
+#include <device/mmio.h>
+/*
+#include <amdblocks/gpio_banks.h>
+#include <amdblocks/acpimmio.h>
+#include <soc/southbridge.h>
+#include <soc/gpio.h>
+*/
+#if 0
+static const struct _uart_info {
+	uintptr_t base;
+	struct soc_amd_gpio mux[2];
+} uart_info[] = {
+	[0] = { APU_UART0_BASE, {
+			PAD_NF(GPIO_138, UART0_TXD, PULL_NONE),
+			PAD_NF(GPIO_136, UART0_RXD, PULL_NONE),
+	} },
+	[1] = { APU_UART1_BASE, {
+			PAD_NF(GPIO_143, UART1_TXD, PULL_NONE),
+			PAD_NF(GPIO_141, UART1_RXD, PULL_NONE),
+	} },
+	/*
+	[2] = { APU_UART2_BASE, {
+			PAD_NF(GPIO_137, UART2_TXD, PULL_NONE),
+			PAD_NF(GPIO_135, UART2_RXD, PULL_NONE),
+	} },
+	[3] = { APU_UART3_BASE, {
+			PAD_NF(GPIO_140, UART3_TXD, PULL_NONE),
+			PAD_NF(GPIO_142, UART3_RXD, PULL_NONE),
+	} },
+	*/
+};
+
+uintptr_t uart_platform_base(int idx)
 {
-	switch (com) {
-	case 0:
-		return AST2400_SUART1;
-	case 1:
-		return AST2400_SUART2;
-	case 2:
-		return AST2400_SUART3;
-	case 4:
-		return AST2400_SUART4;
-	default:
-		return AST2400_SUART1;
+	if (idx < 0 || idx > ARRAY_SIZE(uart_info))
+		return 0;
+
+	return uart_info[idx].base;
+}
+
+void set_uart_config(int idx)
+{
+	uint32_t uart_ctrl;
+	uint16_t uart_leg;
+
+	if (idx < 0 || idx > ARRAY_SIZE(uart_info))
+		return;
+
+	program_gpios(uart_info[idx].mux, 2);
+
+	if (CONFIG(PICASSO_UART_1_8MZ)) {
+		uart_ctrl = sm_pci_read32(SMB_UART_CONFIG);
+		uart_ctrl |= 1 << (SMB_UART_1_8M_SHIFT + idx);
+		sm_pci_write32(SMB_UART_CONFIG, uart_ctrl);
+	}
+
+	if (CONFIG(PICASSO_UART_LEGACY) && idx != 3) {
+		/* Force 3F8 if idx=0, 2F8 if idx=1, 3E8 if idx=2 */
+
+		/* TODO: make clearer once PPR is updated */
+		uart_leg = (idx << 8) | (idx << 10) | (idx << 12) | (idx << 14);
+		if (idx == 0)
+			uart_leg |= 1 << FCH_LEGACY_3F8_SH;
+		else if (idx == 1)
+			uart_leg |= 1 << FCH_LEGACY_2F8_SH;
+		else if (idx == 2)
+			uart_leg |= 1 << FCH_LEGACY_3E8_SH;
+
+		write16((void *)FCH_UART_LEGACY_DECODE, uart_leg);
 	}
 }
 
+unsigned int uart_platform_refclk(void)
+{
+	return CONFIG(PICASSO_UART_48MZ) ? 48000000 : 115200 * 16;
+}
+
+#endif
 #if 0
 static void spin(u32 i)
 {
@@ -119,6 +183,7 @@ void bootblock_soc_init(void)
 #define SINGLE_CHAR_TIMEOUT	(50 * 1000)
 #define FIFO_TIMEOUT		(16 * SINGLE_CHAR_TIMEOUT)
 
+#if 0
 /* Enable IO access to port, then enable UART HW control pins */
 static void enable_serial(unsigned int serial_base, unsigned int io_enable)
 {
@@ -131,42 +196,13 @@ static void enable_serial(unsigned int serial_base, unsigned int io_enable)
 	pci_write_config32(PCI_DEV(0, 0x14, 3), 0x44, 0xc0);
 	pci_write_config32(PCI_DEV(0, 0x14, 3), 0x48, 0x03);
 }
+#endif
 
 void bootblock_mainboard_early_init(void)
 {
-	u32 temp;
-	msr_t msr;
-	u64 mmio_base;
-	/* Configure appropriate physical port of SuperIO chip off BMC */
-	const pnp_devfn_t serial_dev =
-	    PNP_DEV(ASPEED_CONFIG_INDEX,
-	    com_to_ast_sio(CONFIG_UART_FOR_CONSOLE));
-	const pnp_devfn_t gpio_dev = PNP_DEV(ASPEED_CONFIG_INDEX, AST2400_GPIO);
-
 	post_code(0x1d);
-
-	mmio_base = (u64)CONFIG_MMCONF_BASE_ADDRESS;
-	msr = rdmsr(MMIO_CONF_BASE);
-	msr.hi = mmio_base >> 32;
-	msr.lo = (mmio_base & 0xfff00000ull) | 0x21;
-	wrmsr(MMIO_CONF_BASE, msr);
 
 	post_code(0x1e);
 
-	/*sb_clk_output_48Mhz(2);*/
-	temp = read32((void *)0xfed80e40ul);
-	temp |= 4;
-	write32((void *)0xfed80e40ul, temp);
-
 	post_code(0x1f);
-
-	aspeed_enable_serial(serial_dev, CONFIG_TTYS0_BASE);
-
-	/* Port 80h direct to GPIO for LED display */
-	aspeed_enable_port80_direct_gpio(gpio_dev, GPIOH);
-
-	/* Enable UART function pin */
-	aspeed_enable_uart_pin(serial_dev);
-
-	enable_serial(0x03f8, 0x40);
 }

@@ -39,9 +39,12 @@ static void bootblock_main_with_timestamp(uint64_t base_timestamp,
 	}
 
 	timestamp_add_now(TS_START_BOOTBLOCK);
+	post_code(0x80);
 
 	bootblock_soc_early_init();
+	post_code(0x87);
 	bootblock_mainboard_early_init();
+	post_code(0x88);
 
 	if (CONFIG(USE_OPTION_TABLE))
 		sanitize_cmos();
@@ -49,13 +52,20 @@ static void bootblock_main_with_timestamp(uint64_t base_timestamp,
 	if (CONFIG(CMOS_POST))
 		cmos_post_init();
 
+	post_code(0x99);
 	if (CONFIG(BOOTBLOCK_CONSOLE)) {
+	post_code(0x9a);
 		console_init();
+	post_code(0x9b);
 		exception_init();
+	post_code(0x9c);
 	}
 
+	post_code(0xaa);
 	bootblock_soc_init();
+	post_code(0xba);
 	bootblock_mainboard_init();
+	post_code(0xba);
 
 	timestamp_add_now(TS_END_BOOTBLOCK);
 

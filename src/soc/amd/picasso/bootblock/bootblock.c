@@ -124,14 +124,17 @@ void bootblock_soc_init(void)
 {
 	u32 val = cpuid_eax(1);
 	printk(BIOS_DEBUG, "Family_Model: %08x\n", val);
-	for(uint8_t i = 0; ;i++) {
+	for(uint8_t i = 0; i<8;i++) {
 	  // fedc_[f000,e000,a000,9000]
 	  uint8_t *cp = (void *)0xfedc9000;
 		mdelay(250);
-		outb(0x30, 0x3f8);
+		outb(0x31, 0x3f8);
 		*cp = 0x30;
+		printk(BIOS_SPEW, "%d\n", i);
 		post_code(i);
 	}
 
+	printk(BIOS_SPEW, "call fch early init\n");
 	fch_early_init();
+	printk(BIOS_SPEW, "done fch early init\n");
 }

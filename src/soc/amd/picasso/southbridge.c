@@ -213,20 +213,29 @@ static void lpc_configure_decodes(void)
 /* Before console init */
 void fch_pre_init(void)
 {
+	post_code(0xff);
+	// OK
 	lpc_early_init();
 
 	if (!CONFIG(SOC_AMD_COMMON_BLOCK_USE_ESPI))
 		lpc_configure_decodes();
 
+	// OK
+	if (0)
 	fch_spi_early_init();
+	// FAIL at this point
 	enable_acpimmio_decode_pm04();
 	fch_smbus_init();
+	// OK if fch_spi_early_init disabled.
 	sb_enable_cf9_io();
+	// FAIL HERE
 	sb_enable_legacy_io();
 	enable_aoac_devices();
 	sb_reset_i2c_slaves();
 	if (CONFIG(PICASSO_UART))
 		set_uart_config(CONFIG_UART_FOR_CONSOLE);
+	// OK if fch_spi_early_init disabled.
+	post_code(0xfe);
 }
 
 static void print_num_status_bits(int num_bits, uint32_t status,

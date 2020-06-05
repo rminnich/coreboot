@@ -95,6 +95,7 @@ asmlinkage void bootblock_c_entry(uint64_t base_timestamp)
 void bootblock_soc_early_init(void)
 {
 	fch_pre_init();
+	// OK to here.
 }
 
 void bootblock_soc_init(void)

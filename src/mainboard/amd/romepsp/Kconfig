@@ -7,6 +7,7 @@ config BOARD_SPECIFIC_OPTIONS
 	select ARCH_ROMSTAGE_X86_32
 	select ARCH_RAMSTAGE_X86_32
 	select CPU_AMD_ROMEPSP
+	select SOC_AMD_ROMEPSP
 	select IOAPIC_INTERRUPTS_ON_APIC_SERIAL_BUS
 	select HAVE_CMOS_DEFAULT
 	select HAVE_OPTION_TABLE
@@ -103,7 +104,7 @@ config DCACHE_BSP_STACK_SIZE
 
 # Yanked from soc picaso since we can't bring in all that FSP crap
 
-config PICASSO_UART
+config ROMEPSP_UART
 	bool "UART controller on Picasso"
 	default y
 	select DRIVERS_UART_8250MEM
@@ -118,7 +119,7 @@ config PICASSO_UART
 	  3: 0xfedcf000
 
 config CONSOLE_UART_BASE_ADDRESS
-	depends on CONSOLE_SERIAL && PICASSO_UART
+	depends on CONSOLE_SERIAL && ROMEPSP_UART
 	hex
 	default 0xfedc9000 if UART_FOR_CONSOLE = 0
 	default 0xfedca000 if UART_FOR_CONSOLE = 1

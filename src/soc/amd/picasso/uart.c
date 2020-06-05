@@ -77,6 +77,11 @@ void set_uart_config(int idx)
 	}
 }
 
+unsigned int uart_platform_refclk(void)
+{
+	return /*CONFIG(PICASSO_UART_48MZ) ? 48000000 : */115200 * 16;
+}
+
 static const char *uart_acpi_name(const struct device *dev)
 {
 	switch (dev->path.mmio.addr) {

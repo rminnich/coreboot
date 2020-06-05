@@ -57,9 +57,9 @@ void bootblock_mainboard_early_init(void)
 
 // Another fucking weak symbol.
 
+#if 0
 static void set_caching(void)
 {
-#if 0
 	msr_t deftype = {0, 0};
 	int mtrr;
 	/* Disable fixed and variable MTRRs while we setup */
@@ -81,9 +81,10 @@ static void set_caching(void)
 	wrmsr(MTRR_DEF_TYPE_MSR, deftype);
 
 	enable_cache();
-#endif
 }
+#endif
 
+#if 0
 asmlinkage void bootblock_c_entry(uint64_t base_timestamp)
 {
   	set_caching();
@@ -106,3 +107,4 @@ void bootblock_soc_init(void)
 	fch_early_init();
 }
 
+#endif

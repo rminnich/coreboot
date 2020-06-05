@@ -72,5 +72,5 @@ void set_uart_config(int idx)
 
 unsigned int uart_platform_refclk(void)
 {
-	return CONFIG(PICASSO_UART_48MZ) ? 48000000 : 115200 * 16;
+	return /*CONFIG(PICASSO_UART_48MZ) ? 48000000 : */115200 * 16;
 }

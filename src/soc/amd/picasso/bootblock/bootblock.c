@@ -1,5 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
+#include <delay.h>
+#include <arch/io.h>
 #include <stdint.h>
 #include <symbols.h>
 #include <bootblock_common.h>
@@ -56,6 +58,14 @@ void bootblock_soc_init(void)
 {
 	u32 val = cpuid_eax(1);
 	printk(BIOS_DEBUG, "Family_Model: %08x\n", val);
+	for(uint8_t i = 0; ;i++) {
+		// fedc_[f000,e000,a000,9000]
+		uint8_t *cp = (void *)0xfedcf000;
+		mdelay(250);
+		outb(0x30, 0x3f8);
+		*cp = 0x30;
+		post_code(i);
+	}
 
 	fch_early_init();
 }

@@ -30,6 +30,7 @@ struct resource *free_resources = NULL;
  */
 void dev_initialize_chips(void)
 {
+	print_func_entry();
 	const struct device *dev;
 
 	for (dev = all_devices; dev; dev = dev->next) {
@@ -42,6 +43,7 @@ void dev_initialize_chips(void)
 		}
 	}
 	post_log_clear();
+	print_func_exit();
 }
 
 /**
@@ -52,6 +54,7 @@ void dev_initialize_chips(void)
  */
 void dev_finalize_chips(void)
 {
+	print_func_entry();
 	const struct device *dev;
 
 	for (dev = all_devices; dev; dev = dev->next) {
@@ -62,6 +65,7 @@ void dev_finalize_chips(void)
 			dev->chip_ops->finalized = 1;
 		}
 	}
+	print_func_exit();
 }
 
 DECLARE_SPIN_LOCK(dev_lock)
@@ -86,6 +90,7 @@ uint64_t uma_memory_size = 0;
  */
 static struct device *__alloc_dev(struct bus *parent, struct device_path *path)
 {
+	print_func_entry();
 	struct device *dev, *child;
 
 	/* Find the last child of our parent. */
@@ -115,15 +120,18 @@ static struct device *__alloc_dev(struct bus *parent, struct device_path *path)
 	last_dev->next = dev;
 	last_dev = dev;
 
+	print_func_exit();
 	return dev;
 }
 
 struct device *alloc_dev(struct bus *parent, struct device_path *path)
 {
+	print_func_entry();
 	struct device *dev;
 	spin_lock(&dev_lock);
 	dev = __alloc_dev(parent, path);
 	spin_unlock(&dev_lock);
+	print_func_exit();
 	return dev;
 }
 
@@ -136,12 +144,14 @@ struct device *alloc_dev(struct bus *parent, struct device_path *path)
  */
 struct device *alloc_find_dev(struct bus *parent, struct device_path *path)
 {
+	print_func_entry();
 	struct device *child;
 	spin_lock(&dev_lock);
 	child = find_dev_path(parent, path);
 	if (!child)
 		child = __alloc_dev(parent, path);
 	spin_unlock(&dev_lock);
+	print_func_exit();
 	return child;
 }
 
@@ -152,6 +162,7 @@ struct device *alloc_find_dev(struct bus *parent, struct device_path *path)
  */
 static void read_resources(struct bus *bus)
 {
+	print_func_entry();
 	struct device *curdev;
 
 	printk(BIOS_SPEW, "%s %s bus %x link: %d\n", dev_path(bus->dev),
@@ -180,11 +191,13 @@ static void read_resources(struct bus *bus)
 	post_log_clear();
 	printk(BIOS_SPEW, "%s read_resources bus %d link: %d done\n",
 	       dev_path(bus->dev), bus->secondary, bus->link_num);
+	print_func_exit();
 }
 
 struct device *vga_pri = NULL;
 static void set_vga_bridge_bits(void)
 {
+	print_func_entry();
 	/*
 	 * FIXME: Modify set_vga_bridge() so it is less PCI-centric!
 	 * This function knows too much about PCI stuff, it should be just
@@ -250,6 +263,7 @@ static void set_vga_bridge_bits(void)
 		bus->bridge_ctrl |= PCI_BRIDGE_CTL_VGA | PCI_BRIDGE_CTL_VGA16;
 		bus = (bus == bus->dev->bus) ? 0 : bus->dev->bus;
 	}
+	print_func_exit();
 }
 
 /**
@@ -267,6 +281,7 @@ static void set_vga_bridge_bits(void)
  */
 void assign_resources(struct bus *bus)
 {
+	print_func_entry();
 	struct device *curdev;
 
 	printk(BIOS_SPEW, "%s assign_resources, bus %d link: %d\n",
@@ -287,6 +302,7 @@ void assign_resources(struct bus *bus)
 	post_log_clear();
 	printk(BIOS_SPEW, "%s assign_resources, bus %d link: %d\n",
 	       dev_path(bus->dev), bus->secondary, bus->link_num);
+	print_func_exit();
 }
 
 /**
@@ -303,6 +319,7 @@ void assign_resources(struct bus *bus)
  */
 static void enable_resources(struct bus *link)
 {
+	print_func_entry();
 	struct device *dev;
 	struct bus *c_link;
 
@@ -318,6 +335,7 @@ static void enable_resources(struct bus *link)
 			enable_resources(c_link);
 	}
 	post_log_clear();
+	print_func_exit();
 }
 
 /**
@@ -328,11 +346,14 @@ static void enable_resources(struct bus *link)
  */
 int reset_bus(struct bus *bus)
 {
+	print_func_entry();
 	if (bus && bus->dev && bus->dev->ops && bus->dev->ops->reset_bus) {
 		bus->dev->ops->reset_bus(bus);
 		bus->reset_needed = 0;
+		print_func_exit();
 		return 1;
 	}
+	print_func_exit();
 	return 0;
 }
 
@@ -347,12 +368,15 @@ int reset_bus(struct bus *bus)
  */
 static void scan_bus(struct device *busdev)
 {
+	print_func_entry();
 	int do_scan_bus;
 	struct stopwatch sw;
 	long scan_time;
 
-	if (!busdev->enabled)
+	if (!busdev->enabled) {
+		print_func_exit();
 		return;
+	}
 
 	printk(BIOS_DEBUG, "%s scanning...\n", dev_path(busdev));
 
@@ -378,10 +402,12 @@ static void scan_bus(struct device *busdev)
 	scan_time = stopwatch_duration_msecs(&sw);
 	printk(BIOS_DEBUG, "%s: bus %s finished in %ld msecs\n", __func__,
 	       dev_path(busdev), scan_time);
+	print_func_exit();
 }
 
 void scan_bridges(struct bus *bus)
 {
+	print_func_entry();
 	struct device *child;
 
 	for (child = bus->children; child; child = child->sibling) {
@@ -389,6 +415,7 @@ void scan_bridges(struct bus *bus)
 			continue;
 		scan_bus(child);
 	}
+	print_func_exit();
 }
 
 /**
@@ -415,6 +442,7 @@ void scan_bridges(struct bus *bus)
  */
 void dev_enumerate(void)
 {
+	print_func_entry();
 	struct device *root;
 
 	printk(BIOS_INFO, "Enumerating buses...\n");
@@ -430,11 +458,13 @@ void dev_enumerate(void)
 
 	if (!root->ops || !root->ops->scan_bus) {
 		printk(BIOS_ERR, "dev_root missing scan_bus operation");
+		print_func_exit();
 		return;
 	}
 	scan_bus(root);
 	post_log_clear();
 	printk(BIOS_INFO, "done\n");
+	print_func_exit();
 }
 
 /**
@@ -452,6 +482,7 @@ void dev_enumerate(void)
  */
 void dev_configure(void)
 {
+	print_func_entry();
 	const struct device *root;
 
 	set_vga_bridge_bits();
@@ -481,6 +512,7 @@ void dev_configure(void)
 	print_resource_tree(root, BIOS_SPEW, "After assigning values.");
 
 	printk(BIOS_INFO, "Done allocating resources.\n");
+	print_func_exit();
 }
 
 /**
@@ -491,6 +523,7 @@ void dev_configure(void)
  */
 void dev_enable(void)
 {
+	print_func_entry();
 	struct bus *link;
 
 	printk(BIOS_INFO, "Enabling resources...\n");
@@ -500,6 +533,7 @@ void dev_enable(void)
 		enable_resources(link);
 
 	printk(BIOS_INFO, "done.\n");
+	print_func_exit();
 }
 
 /**
@@ -513,8 +547,11 @@ void dev_enable(void)
  */
 static void init_dev(struct device *dev)
 {
-	if (!dev->enabled)
+	print_func_entry();
+	if (!dev->enabled) {
+		print_func_exit();
 		return;
+	}
 
 	if (!dev->initialized && dev->ops && dev->ops->init) {
 		struct stopwatch sw;
@@ -535,10 +572,12 @@ static void init_dev(struct device *dev)
 		printk(BIOS_DEBUG, "%s init finished in %ld msecs\n", dev_path(dev),
 		       init_time);
 	}
+	print_func_exit();
 }
 
 static void init_link(struct bus *link)
 {
+	print_func_entry();
 	struct device *dev;
 	struct bus *c_link;
 
@@ -552,6 +591,7 @@ static void init_link(struct bus *link)
 		for (c_link = dev->link_list; c_link; c_link = c_link->next)
 			init_link(c_link);
 	}
+	print_func_exit();
 }
 
 /**
@@ -562,6 +602,7 @@ static void init_link(struct bus *link)
  */
 void dev_initialize(void)
 {
+	print_func_entry();
 	struct bus *link;
 
 	printk(BIOS_INFO, "Initializing devices...\n");
@@ -581,6 +622,7 @@ void dev_initialize(void)
 
 	printk(BIOS_INFO, "Devices initialized\n");
 	show_all_devs(BIOS_SPEW, "After init.");
+	print_func_exit();
 }
 
 /**
@@ -594,17 +636,22 @@ void dev_initialize(void)
  */
 static void final_dev(struct device *dev)
 {
-	if (!dev->enabled)
+	print_func_entry();
+	if (!dev->enabled) {
+		print_func_exit();
 		return;
+	}
 
 	if (dev->ops && dev->ops->final) {
 		printk(BIOS_DEBUG, "%s final\n", dev_path(dev));
 		dev->ops->final(dev);
 	}
+	print_func_exit();
 }
 
 static void final_link(struct bus *link)
 {
+	print_func_entry();
 	struct device *dev;
 	struct bus *c_link;
 
@@ -615,6 +662,7 @@ static void final_link(struct bus *link)
 		for (c_link = dev->link_list; c_link; c_link = c_link->next)
 			final_link(c_link);
 	}
+	print_func_exit();
 }
 /**
  * Finalize all devices in the global device tree.
@@ -624,6 +672,7 @@ static void final_link(struct bus *link)
  */
 void dev_finalize(void)
 {
+	print_func_entry();
 	struct bus *link;
 
 	printk(BIOS_INFO, "Finalize devices...\n");
@@ -636,4 +685,5 @@ void dev_finalize(void)
 		final_link(link);
 
 	printk(BIOS_INFO, "Devices finalized\n");
+	print_func_exit();
 }

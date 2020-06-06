@@ -94,6 +94,7 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 	ram_resource(dev, 11, 768, tomk - 768);
 //	if (high)
 //		ram_resource(dev, idx++, 4 * 1024 * 1024, high);
+	if (0)
 	db();
 	print_func_exit();
 }
@@ -105,6 +106,7 @@ struct chip_operations mainboard_amd_romepsp_ops = {
 static void mainboard_enable(struct device *dev)
 {
 	print_func_entry();
+	mainboard_amd_romepsp_enable(dev);
 	printk(BIOS_INFO, "Mainboard " CONFIG_MAINBOARD_PART_NUMBER " Enable.\n");
 	print_func_exit();
 }

@@ -27,7 +27,7 @@ static void clear_agesa_mtrrs(void)
 {
 	disable_cache();
 
-	picasso_restore_mtrrs();
+	romepsp_restore_mtrrs();
 
 	enable_cache();
 }
@@ -95,7 +95,7 @@ asmlinkage void car_stage_entry(void)
 	printk(BIOS_DEBUG, "Family_Model: %08x\n", val);
 
 	post_code(0x43);
-	picasso_save_mtrrs();
+	romepsp_save_mtrrs();
 
 	post_code(0x44);
 	fsp_memory_init(s3_resume);

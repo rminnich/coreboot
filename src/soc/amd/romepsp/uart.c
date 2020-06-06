@@ -75,4 +75,3 @@ unsigned int uart_platform_refclk(void)
   return /*CONFIG(ROMEPSP_UART_48MZ) ?*/ 48000000/* : 115200 * 16 */;
 }
 
-fuck

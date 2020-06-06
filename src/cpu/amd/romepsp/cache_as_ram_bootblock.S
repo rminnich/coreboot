@@ -12,6 +12,7 @@ cache_as_ram:
 	 * initialization.
 	 */
 
+#if 0
 	/* Clear the cache memory region. This will also clear CAR GLOBAL */
 	movl	$_car_region_start, %edi
 	movl	$_car_region_end, %ecx
@@ -19,10 +20,11 @@ cache_as_ram:
 	shr	$2, %ecx
 	xorl	%eax, %eax
 	rep	stosl
+#endif
 
 	post_code(0x21)
 
-	movl	$_ecar_stack, %esp
+	movl	$0x2000, %esp
 
 	/* Align the stack and keep aligned for call to bootblock_c_entry() */
 	and	$0xfffffff0, %esp

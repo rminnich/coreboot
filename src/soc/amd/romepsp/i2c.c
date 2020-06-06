@@ -37,7 +37,7 @@ uintptr_t dw_i2c_base_address(unsigned int bus)
 
 const struct dw_i2c_bus_config *dw_i2c_get_soc_cfg(unsigned int bus)
 {
-	const struct soc_amd_rompsp_config *config;
+	const struct soc_amd_romepsp_config *config;
 
 	if (bus >= ARRAY_SIZE(config->i2c))
 		return NULL;
@@ -80,7 +80,7 @@ __weak void mainboard_i2c_override(int bus, uint32_t *pad_settings) { }
 static void dw_i2c_soc_init(bool is_early_init)
 {
 	size_t i;
-	const struct soc_amd_rompsp_config *config;
+	const struct soc_amd_romepsp_config *config;
 	uint32_t pad_ctrl;
 	int misc_reg;
 
@@ -128,7 +128,7 @@ void i2c_soc_init(void)
 	dw_i2c_soc_init(false);
 }
 
-struct device_operations rompsp_i2c_mmio_ops = {
+struct device_operations romepsp_i2c_mmio_ops = {
 	/* TODO(teravest): Move I2C resource info here. */
 	.read_resources = noop_read_resources,
 	.set_resources = noop_set_resources,
@@ -179,7 +179,7 @@ static void restore_i2c_pin_registers(uint8_t gpio,
 /* Slaves to be reset are controlled by devicetree register i2c_scl_reset */
 void sb_reset_i2c_slaves(void)
 {
-	const struct soc_amd_rompsp_config *cfg;
+	const struct soc_amd_romepsp_config *cfg;
 	const struct device *dev = pcidev_path_on_root(GNB_DEVFN);
 	struct soc_amd_i2c_save save_table[saved_pins_count];
 	uint8_t i, j, control;

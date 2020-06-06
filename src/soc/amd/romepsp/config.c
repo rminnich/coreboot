@@ -6,6 +6,6 @@
 
 const struct soc_amd_common_config *soc_get_common_config()
 {
-	const struct soc_amd_rompsp_config *cfg = config_of_soc();
+	const struct soc_amd_romepsp_config *cfg = config_of_soc();
 	return &cfg->common_config;
 }

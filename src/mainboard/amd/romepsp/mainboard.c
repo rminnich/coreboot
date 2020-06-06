@@ -114,9 +114,11 @@ struct chip_operations mainboard_ops = {
 	.enable_dev = mainboard_enable,
 };
 
+#if 0
 void do_board_reset(void)
 {
 	print_func_entry();
 	die("reset");
 	print_func_exit();
 }
+#endif

@@ -91,7 +91,7 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 	printk(BIOS_DEBUG, "QEMU: cmos: %lu MiB RAM below 4G.\n", tomk / 1024);
 	/* Report the memory regions. */
 	ram_resource(dev, 10, 0, 640);
-	ram_resource(dev, 11, 768, tomk - 768);
+	ram_resource(dev, 11, 1024, /*tomk - 1024);*/1024*1024*512);
 //	if (high)
 //		ram_resource(dev, idx++, 4 * 1024 * 1024, high);
 	if (0)

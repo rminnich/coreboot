@@ -19,6 +19,10 @@
 #define E820_OFFSET 0x2d0
 
 .trampoline_start:
+
+movb $0x31, %al
+movw $0x3f8, %dx
+outb %al, %dx
 cld
 xor %edx, %edx
 mov $0, %ecx
@@ -110,6 +114,10 @@ movl %eax, 2(%eax)			// Set pointer to new GDT
 lgdt (%eax)				// Load it
 
 /* finally: jump to kernel */
+1:
+movb $0x31, %al
+movw $0x3f8, %dx
+outb %al, %dx
 mov $LINUX_PARAM_LOC, %esi
 jmp *(LINUX_PARAM_LOC + LINUX_ENTRY_OFFSET)
 

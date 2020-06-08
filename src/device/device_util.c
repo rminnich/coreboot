@@ -16,7 +16,6 @@
  */
 struct device *dev_find_lapic(unsigned int apic_id)
 {
-	print_func_entry();
 	struct device *dev;
 	struct device *result = NULL;
 
@@ -27,7 +26,6 @@ struct device *dev_find_lapic(unsigned int apic_id)
 			break;
 		}
 	}
-	print_func_exit();
 	return result;
 }
 
@@ -43,7 +41,6 @@ struct device *dev_find_lapic(unsigned int apic_id)
  */
 struct device *dev_find_device(u16 vendor, u16 device, struct device *from)
 {
-	print_func_entry();
 	if (!from)
 		from = all_devices;
 	else
@@ -52,7 +49,6 @@ struct device *dev_find_device(u16 vendor, u16 device, struct device *from)
 	while (from && (from->vendor != vendor || from->device != device))
 		from = from->next;
 
-	print_func_exit();
 	return from;
 }
 
@@ -67,7 +63,6 @@ struct device *dev_find_device(u16 vendor, u16 device, struct device *from)
  */
 struct device *dev_find_class(unsigned int class, struct device *from)
 {
-	print_func_entry();
 	if (!from)
 		from = all_devices;
 	else
@@ -76,7 +71,6 @@ struct device *dev_find_class(unsigned int class, struct device *from)
 	while (from && (from->class & 0xffffff00) != class)
 		from = from->next;
 
-	print_func_exit();
 	return from;
 }
 
@@ -88,11 +82,9 @@ struct device *dev_find_class(unsigned int class, struct device *from)
  */
 u32 dev_path_encode(const struct device *dev)
 {
-	print_func_entry();
 	u32 ret;
 
 	if (!dev) {
-		print_func_exit();
 		return 0;
 	}
 
@@ -145,7 +137,6 @@ u32 dev_path_encode(const struct device *dev)
 		break;
 	}
 
-	print_func_exit();
 	return ret;
 }
 
@@ -155,7 +146,6 @@ u32 dev_path_encode(const struct device *dev)
  */
 const char *dev_path(const struct device *dev)
 {
-	print_func_entry();
 	static char buffer[DEVICE_PATH_MAX];
 
 	buffer[0] = '\0';
@@ -240,34 +230,27 @@ const char *dev_path(const struct device *dev)
 			break;
 		}
 	}
-	print_func_exit();
 	return buffer;
 }
 
 const char *dev_name(const struct device *dev)
 {
-	print_func_entry();
 	if (dev->name) {
-		print_func_exit();
 		return dev->name;
 	}
 	else if (dev->chip_ops && dev->chip_ops->name) {
-		print_func_exit();
 		return dev->chip_ops->name;
 	}
 	else {
-		print_func_exit();
 		return "unknown";
 	}
 }
 
 const char *bus_path(struct bus *bus)
 {
-	print_func_entry();
 	static char buffer[BUS_PATH_MAX];
 	snprintf(buffer, sizeof(buffer),
 		 "%s,%d", dev_path(bus->dev), bus->link_num);
-	print_func_exit();
 	return buffer;
 }
 
@@ -278,14 +261,12 @@ const char *bus_path(struct bus *bus)
  */
 static int allocate_more_resources(void)
 {
-	print_func_entry();
 	int i;
 	struct resource *new_res_list;
 
 	new_res_list = malloc(64 * sizeof(*new_res_list));
 
 	if (new_res_list == NULL) {
-		print_func_exit();
 		return 0;
 	}
 
@@ -295,7 +276,6 @@ static int allocate_more_resources(void)
 		new_res_list[i].next = &new_res_list[i+1];
 
 	free_resources = new_res_list;
-	print_func_exit();
 	return 1;
 }
 
@@ -310,7 +290,6 @@ static int allocate_more_resources(void)
 static void free_resource(struct device *dev, struct resource *res,
 			  struct resource *prev)
 {
-	print_func_entry();
 	if (prev)
 		prev->next = res->next;
 	else
@@ -318,7 +297,6 @@ static void free_resource(struct device *dev, struct resource *res,
 
 	res->next = free_resources;
 	free_resources = res;
-	print_func_exit();
 }
 
 /**
@@ -330,7 +308,6 @@ static void free_resource(struct device *dev, struct resource *res,
  */
 void compact_resources(struct device *dev)
 {
-	print_func_entry();
 	struct resource *res, *next, *prev = NULL;
 
 	/* Move all of the free resources to the end */
@@ -341,7 +318,6 @@ void compact_resources(struct device *dev)
 		else
 			prev = res;
 	}
-	print_func_exit();
 }
 
 /**
@@ -353,7 +329,6 @@ void compact_resources(struct device *dev)
  */
 struct resource *probe_resource(const struct device *dev, unsigned int index)
 {
-	print_func_entry();
 	struct resource *res;
 
 	/* See if there is a resource with the appropriate index */
@@ -362,7 +337,6 @@ struct resource *probe_resource(const struct device *dev, unsigned int index)
 			break;
 	}
 
-	print_func_exit();
 	return res;
 }
 
@@ -378,7 +352,6 @@ struct resource *probe_resource(const struct device *dev, unsigned int index)
  */
 struct resource *new_resource(struct device *dev, unsigned int index)
 {
-	print_func_entry();
 	struct resource *resource, *tail;
 
 	/* First move all of the free resources to the end. */
@@ -414,7 +387,6 @@ struct resource *new_resource(struct device *dev, unsigned int index)
 	resource->align = 0;
 	resource->gran  = 0;
 
-	print_func_exit();
 	return resource;
 }
 
@@ -427,7 +399,6 @@ struct resource *new_resource(struct device *dev, unsigned int index)
  */
 struct resource *find_resource(const struct device *dev, unsigned int index)
 {
-	print_func_entry();
 	struct resource *resource;
 
 	/* See if there is a resource with the appropriate index. */
@@ -437,7 +408,6 @@ struct resource *find_resource(const struct device *dev, unsigned int index)
 		       dev_path(dev), index);
 		die("");
 	}
-	print_func_exit();
 	return resource;
 }
 
@@ -450,12 +420,10 @@ struct resource *find_resource(const struct device *dev, unsigned int index)
  */
 static resource_t align_up(resource_t val, unsigned long gran)
 {
-	print_func_entry();
 	resource_t mask;
 	mask = (1ULL << gran) - 1ULL;
 	val += mask;
 	val &= ~mask;
-	print_func_exit();
 	return val;
 }
 
@@ -468,11 +436,9 @@ static resource_t align_up(resource_t val, unsigned long gran)
  */
 static resource_t align_down(resource_t val, unsigned long gran)
 {
-	print_func_entry();
 	resource_t mask;
 	mask = (1ULL << gran) - 1ULL;
 	val &= ~mask;
-	print_func_exit();
 	return val;
 }
 
@@ -484,7 +450,6 @@ static resource_t align_down(resource_t val, unsigned long gran)
  */
 resource_t resource_end(struct resource *resource)
 {
-	print_func_entry();
 	resource_t base, end;
 
 	/* Get the base address. */
@@ -500,7 +465,6 @@ resource_t resource_end(struct resource *resource)
 	/* Get the end (rounded up). */
 	end = base + align_up(resource->size, resource->gran) - 1;
 
-	print_func_exit();
 	return end;
 }
 
@@ -512,12 +476,10 @@ resource_t resource_end(struct resource *resource)
  */
 resource_t resource_max(struct resource *resource)
 {
-	print_func_entry();
 	resource_t max;
 
 	max = align_down(resource->limit - resource->size + 1, resource->align);
 
-	print_func_exit();
 	return max;
 }
 
@@ -529,7 +491,6 @@ resource_t resource_max(struct resource *resource)
  */
 const char *resource_type(struct resource *resource)
 {
-	print_func_entry();
 	static char buffer[RESOURCE_TYPE_MAX];
 	snprintf(buffer, sizeof(buffer), "%s%s%s%s",
 		 ((resource->flags & IORESOURCE_READONLY) ? "ro" : ""),
@@ -540,7 +501,6 @@ const char *resource_type(struct resource *resource)
 		  (resource->flags & IORESOURCE_IRQ) ? "irq" :
 		  (resource->flags & IORESOURCE_MEM) ? "mem" : "??????"),
 		 ((resource->flags & IORESOURCE_PCI64) ? "64" : ""));
-	print_func_exit();
 	return buffer;
 }
 
@@ -554,12 +514,10 @@ const char *resource_type(struct resource *resource)
 void report_resource_stored(struct device *dev, struct resource *resource,
 			    const char *comment)
 {
-	print_func_entry();
 	char buf[10];
 	unsigned long long base, end;
 
 	if (!(resource->flags & IORESOURCE_STORED)) {
-		print_func_exit();
 		return;
 	}
 
@@ -575,14 +533,12 @@ void report_resource_stored(struct device *dev, struct resource *resource,
 	       "gran 0x%02x %s%s%s\n", dev_path(dev), resource->index,
 		base, end, resource->size, resource->gran, buf,
 		resource_type(resource), comment);
-	print_func_exit();
 }
 
 void search_bus_resources(struct bus *bus, unsigned long type_mask,
 			  unsigned long type, resource_search_t search,
 			  void *gp)
 {
-	print_func_entry();
 	struct device *curdev;
 
 	for (curdev = bus->children; curdev; curdev = curdev->sibling) {
@@ -614,13 +570,11 @@ void search_bus_resources(struct bus *bus, unsigned long type_mask,
 			search(gp, curdev, res);
 		}
 	}
-	print_func_exit();
 }
 
 void search_global_resources(unsigned long type_mask, unsigned long type,
 			     resource_search_t search, void *gp)
 {
-	print_func_entry();
 	struct device *curdev;
 
 	for (curdev = all_devices; curdev; curdev = curdev->next) {
@@ -642,14 +596,11 @@ void search_global_resources(unsigned long type_mask, unsigned long type,
 			search(gp, curdev, res);
 		}
 	}
-	print_func_exit();
 }
 
 void dev_set_enabled(struct device *dev, int enable)
 {
-	print_func_entry();
 	if (dev->enabled == enable) {
-		print_func_exit();
 		return;
 	}
 
@@ -659,12 +610,10 @@ void dev_set_enabled(struct device *dev, int enable)
 	} else if (dev->chip_ops && dev->chip_ops->enable_dev) {
 		dev->chip_ops->enable_dev(dev);
 	}
-	print_func_exit();
 }
 
 void disable_children(struct bus *bus)
 {
-	print_func_entry();
 	struct device *child;
 
 	for (child = bus->children; child; child = child->sibling) {
@@ -673,7 +622,6 @@ void disable_children(struct bus *bus)
 			disable_children(link);
 		dev_set_enabled(child, 0);
 	}
-	print_func_exit();
 }
 
 /*
@@ -682,17 +630,14 @@ void disable_children(struct bus *bus)
  */
 bool dev_is_active_bridge(struct device *dev)
 {
-	print_func_entry();
 	struct bus *link;
 	struct device *child;
 
 	if (!dev || !dev->enabled) {
-		print_func_exit();
 		return 0;
 	}
 
 	if (!dev->link_list || !dev->link_list->children) {
-		print_func_exit();
 		return 0;
 	}
 
@@ -702,13 +647,11 @@ bool dev_is_active_bridge(struct device *dev)
 				continue;
 
 			if (child->enabled) {
-				print_func_exit();
 				return 1;
 			}
 		}
 	}
 
-	print_func_exit();
 	return 0;
 }
 
@@ -720,7 +663,6 @@ bool dev_is_active_bridge(struct device *dev)
  */
 void add_more_links(struct device *dev, unsigned int total_links)
 {
-	print_func_entry();
 	struct bus *link, *last = NULL;
 	int link_num = -1;
 
@@ -740,7 +682,6 @@ void add_more_links(struct device *dev, unsigned int total_links)
 			last->next = link;
 		} else {
 			/* No more links to add */
-			print_func_exit();
 			return;
 		}
 	} else {
@@ -759,12 +700,10 @@ void add_more_links(struct device *dev, unsigned int total_links)
 		link = link->next;
 	}
 	last->next = NULL;
-	print_func_exit();
 }
 
 static void resource_tree(const struct device *root, int debug_level, int depth)
 {
-	print_func_entry();
 	int i = 0;
 	struct device *child;
 	struct bus *link;
@@ -793,34 +732,27 @@ static void resource_tree(const struct device *root, int debug_level, int depth)
 		for (child = link->children; child; child = child->sibling)
 			resource_tree(child, debug_level, depth + 1);
 	}
-	print_func_exit();
 }
 
 void print_resource_tree(const struct device *root, int debug_level,
 			 const char *msg)
 {
-	print_func_entry();
-	/* Bail if root is null. */
 	if (!root) {
 		do_printk(debug_level, "%s passed NULL for root!\n", __func__);
-		print_func_exit();
 		return;
 	}
 
 	/* Bail if not printing to screen. */
 	if (!do_printk(debug_level, "Show resources in subtree (%s)...%s\n",
 		       dev_path(root), msg)) {
-		print_func_exit();
 		return;
 	}
 
 	resource_tree(root, debug_level, 0);
-	print_func_exit();
 }
 
 void show_devs_tree(const struct device *dev, int debug_level, int depth)
 {
-	print_func_entry();
 	char depth_str[20];
 	int i;
 	struct device *sibling;
@@ -838,56 +770,43 @@ void show_devs_tree(const struct device *dev, int debug_level, int depth)
 		     sibling = sibling->sibling)
 			show_devs_tree(sibling, debug_level, depth + 1);
 	}
-	print_func_exit();
 }
 
 void show_all_devs_tree(int debug_level, const char *msg)
 {
-	print_func_entry();
-	/* Bail if not printing to screen. */
 	if (!do_printk(debug_level, "Show all devs in tree form... %s\n", msg)) {
-		print_func_exit();
 		return;
 	}
 	show_devs_tree(all_devices, debug_level, 0);
-	print_func_exit();
 }
 
 void show_devs_subtree(struct device *root, int debug_level, const char *msg)
 {
-	print_func_entry();
-	/* Bail if not printing to screen. */
 	if (!do_printk(debug_level, "Show all devs in subtree %s... %s\n",
 		       dev_path(root), msg)) {
-		print_func_exit();
 		return;
 	}
 	do_printk(debug_level, "%s\n", msg);
 	show_devs_tree(root, debug_level, 0);
-	print_func_exit();
 }
 
 void show_all_devs(int debug_level, const char *msg)
 {
-	print_func_entry();
 	struct device *dev;
 
 	/* Bail if not printing to screen. */
 	if (!do_printk(debug_level, "Show all devs... %s\n", msg)) {
-		print_func_exit();
 		return;
 	}
 	for (dev = all_devices; dev; dev = dev->next) {
 		do_printk(debug_level, "%s: enabled %d\n",
 			  dev_path(dev), dev->enabled);
 	}
-	print_func_exit();
 }
 
 void show_one_resource(int debug_level, struct device *dev,
 		       struct resource *resource, const char *comment)
 {
-	print_func_entry();
 	char buf[10];
 	unsigned long long base, end;
 	base = resource->base;
@@ -898,16 +817,13 @@ void show_one_resource(int debug_level, struct device *dev,
 		  "size 0x%08llx gran 0x%02x %s%s%s\n", dev_path(dev),
 		  resource->index, base, end, resource->size, resource->gran,
 		  buf, resource_type(resource), comment);
-	print_func_exit();
 }
 
 void show_all_devs_resources(int debug_level, const char* msg)
 {
-	print_func_entry();
 	struct device *dev;
 
 	if (!do_printk(debug_level, "Show all devs with resources... %s\n", msg)) {
-		print_func_exit();
 		return;
 	}
 
@@ -918,18 +834,15 @@ void show_all_devs_resources(int debug_level, const char* msg)
 		for (res = dev->resource_list; res; res = res->next)
 			show_one_resource(debug_level, dev, res, "");
 	}
-	print_func_exit();
 }
 
 void fixed_mem_resource(struct device *dev, unsigned long index,
 			unsigned long basek, unsigned long sizek,
 			unsigned long type)
 {
-	print_func_entry();
 	struct resource *resource;
 
 	if (!sizek) {
-		print_func_exit();
 		return;
 	}
 
@@ -940,13 +853,11 @@ void fixed_mem_resource(struct device *dev, unsigned long index,
 		 IORESOURCE_STORED | IORESOURCE_ASSIGNED;
 
 	resource->flags |= type;
-	print_func_exit();
 }
 
 void fixed_io_resource(struct device *dev, unsigned long index,
 			unsigned long base, unsigned long size)
 {
-	print_func_entry();
 	struct resource *resource;
 
 	resource = new_resource(dev, index);
@@ -956,13 +867,11 @@ void fixed_io_resource(struct device *dev, unsigned long index,
 	resource->flags = IORESOURCE_IO | IORESOURCE_FIXED |
 		 IORESOURCE_STORED | IORESOURCE_ASSIGNED |
 		 IORESOURCE_RESERVE;
-	print_func_exit();
 }
 
 void mmconf_resource_init(struct resource *resource, resource_t base,
 	int buses)
 {
-	print_func_entry();
 	resource->base = base;
 	resource->size = buses * MiB;
 	resource->flags = IORESOURCE_MEM | IORESOURCE_RESERVE |
@@ -971,21 +880,17 @@ void mmconf_resource_init(struct resource *resource, resource_t base,
 	printk(BIOS_DEBUG, "Adding PCIe enhanced config space BAR "
 			"0x%08lx-0x%08lx.\n", (unsigned long)(resource->base),
 			(unsigned long)(resource->base + resource->size));
-	print_func_exit();
 }
 
 void mmconf_resource(struct device *dev, unsigned long index)
 {
-	print_func_entry();
 	struct resource *resource = new_resource(dev, index);
 	mmconf_resource_init(resource, CONFIG_MMCONF_BASE_ADDRESS,
 		CONFIG_MMCONF_BUS_NUMBER);
-	print_func_exit();
 }
 
 void tolm_test(void *gp, struct device *dev, struct resource *new)
 {
-	print_func_entry();
 	struct resource **best_p = gp;
 	struct resource *best;
 
@@ -996,7 +901,6 @@ void tolm_test(void *gp, struct device *dev, struct resource *new)
 	 * then do not consider this resource in tolm calculations.
 	 */
 	if (new->size == 0) {
-		print_func_exit();
 		return;
 	}
 
@@ -1004,12 +908,10 @@ void tolm_test(void *gp, struct device *dev, struct resource *new)
 		best = new;
 
 	*best_p = best;
-	print_func_exit();
 }
 
 u32 find_pci_tolm(struct bus *bus)
 {
-	print_func_entry();
 	struct resource *min = NULL;
 	u32 tolm;
 	unsigned long mask_match = IORESOURCE_MEM | IORESOURCE_ASSIGNED;
@@ -1021,14 +923,12 @@ u32 find_pci_tolm(struct bus *bus)
 	if (min && tolm > min->base)
 		tolm = min->base;
 
-	print_func_exit();
 	return tolm;
 }
 
 /* Count of enabled CPUs */
 int dev_count_cpu(void)
 {
-	print_func_entry();
 	struct device *cpu;
 	int count = 0;
 
@@ -1041,20 +941,17 @@ int dev_count_cpu(void)
 		count++;
 	}
 
-	print_func_exit();
 	return count;
 }
 
 /* Get device path name */
 const char *dev_path_name(enum device_path_type type)
 {
-	print_func_entry();
 	static const char *const type_names[] = DEVICE_PATH_NAMES;
 	const char *type_name = "Unknown";
 
 	/* Translate the type value into a string */
 	if (type < ARRAY_SIZE(type_names))
 		type_name = type_names[type];
-	print_func_exit();
 	return type_name;
 }

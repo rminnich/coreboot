@@ -29,6 +29,7 @@ ramstage-y += ../../../soc/amd/common/block/spi/fch_spi.c ../../..//soc/amd/pica
 ramstage-y += ../../..//soc/amd/romepsp/acpi.c
 ramstage-y += ../../..//soc/amd/picasso/psp.c
 ramstage-y += ../../..//soc/amd/romepsp/cpu.c
+ramstage-y += ../../..//soc/amd/romepsp/chip.c
 ramstage-y += ../../..//soc/amd/romepsp/root_complex.c
 
 CPPFLAGS_common += -I$(src)/soc/amd/common/block/include

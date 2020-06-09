@@ -135,9 +135,9 @@ static void enable_dev(struct device *dev)
 		}
 		sb_enable(dev);
 	} else if (dev->path.type == DEVICE_PATH_MMIO) {
-		printk(BIOS_ERR, "SHIT! MMIO chip.c at 138\n");
-		//if (i2c_acpi_name(dev) != NULL)
-			//dev->ops = &romepsp_i2c_mmio_ops;
+		printk(BIOS_SPEW, "fuck i2c\n");
+		if (i2c_acpi_name(dev) != NULL)
+			dev->ops = &romepsp_i2c_mmio_ops;
 	}
 }
 
@@ -147,7 +147,7 @@ static void soc_init(void *chip_info)
 
 	//fsp_silicon_init(acpi_is_wakeup_s3());
 
-	//data_fabric_set_mmio_np();
+	data_fabric_set_mmio_np();
 	southbridge_init(chip_info);
 	setup_bsp_ramtop();
 }

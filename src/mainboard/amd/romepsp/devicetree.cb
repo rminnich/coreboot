@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-chip soc/amd/picasso
+chip soc/amd/romepsp
 
 	# Set FADT Configuration
 	register "fadt_pm_profile" = "PM_MOBILE"
@@ -110,7 +110,7 @@ chip soc/amd/picasso
 
 	# See AMD 55570-B1 Table 13: PCI Device ID Assignments.
 	device domain 0 on
-		subsystemid 0x1022 0x1510 inherit
+		subsystemid 0x1022 0x1450 inherit
 		device pci 0.0 on  end # Root Complex
 		device pci 0.2 on  end # IOMMU
 		device pci 1.0 on  end # Dummy Host Bridge, must be enabled
@@ -187,4 +187,4 @@ chip soc/amd/picasso
 		end
 	end
 
-end	# chip soc/amd/picasso
+end	# chip soc/amd/romepsp

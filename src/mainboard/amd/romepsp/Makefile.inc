@@ -7,7 +7,7 @@ subdirs-y += ../../../cpu/x86/pae
 subdirs-y += ../../../cpu/x86/smm
 
 
-# ewwwww ... 
+# ewwwww ...
 subdirs-y += ../../../drivers/generic/ioapic
 
 bootblock-y += ../../../soc/amd/common/block/spi/fch_spi.c ../../..//soc/amd/picasso/config.c ../../..//soc/amd/picasso/gpio.c ../../..//soc/amd/romepsp/i2c.c ../../..//soc/amd/picasso/smi_util.c ../../..//soc/amd/picasso/southbridge.c ../../..//soc/amd/romepsp/uart.c ../../..//soc/amd/picasso/bootblock/bootblock.c

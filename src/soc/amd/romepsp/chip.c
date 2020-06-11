@@ -135,7 +135,7 @@ static void enable_dev(struct device *dev)
 		}
 		sb_enable(dev);
 	} else if (dev->path.type == DEVICE_PATH_MMIO) {
-		printk(BIOS_SPEW, "fuck i2c\n");
+		printk(BIOS_SPEW, "ENABLE_DEV  i2c\n");
 		if (i2c_acpi_name(dev) != NULL)
 			dev->ops = &romepsp_i2c_mmio_ops;
 	}

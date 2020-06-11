@@ -112,7 +112,7 @@ chip soc/amd/romepsp
 	device domain 0 on
 		subsystemid 0x1022 0x1450 inherit
 		device pci 0.0 mandatory  end # Root Complex
-		device pci 0.2 on  end # IOMMU
+		device pci 0.2 mandatory  end # IOMMU
 		device pci 1.0 off  end # Dummy Host Bridge, must be enabled
 		device pci 1.1 off end # GPP Bridge 0
 		device pci 1.2 off  end # GPP Bridge 1 - Wifi

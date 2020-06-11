@@ -27,6 +27,7 @@ struct smm_relocation_params {
 
 #if 0
 static struct smm_relocation_params smm_reloc_params;
+#endif
 
 /*
  * Do essential initialization tasks before APs can be fired up -
@@ -41,7 +42,6 @@ static void pre_mp_init(void)
 	x86_mtrr_check();
 }
 
-#endif
 int get_cpu_count(void)
 {
 	return 1 + (cpuid_ecx(0x80000008) & 0xff);
@@ -92,21 +92,19 @@ static void relocation_handler(int cpu, uintptr_t curr_smbase,
 }
 #endif
 
-#if 0
 static const struct mp_ops mp_ops = {
 	.pre_mp_init = pre_mp_init,
 	.get_cpu_count = get_cpu_count,
 	//.get_smm_info = get_smm_info,
-	.relocation_handler = relocation_handler,
-	.post_mp_init = enable_smi_generation,
+	//.relocation_handler = relocation_handler,
+	//.post_mp_init = enable_smi_generation,
 };
-#endif
 
 void mp_init_cpus(struct bus *cpu_bus)
 {
 	/* Clear for take-off */
-	//if (mp_init_with_smm(cpu_bus, &mp_ops) < 0)
-		//printk(BIOS_ERR, "MP initialization failure.\n");
+	if (mp_init_with_smm(cpu_bus, &mp_ops) < 0)
+		printk(BIOS_ERR, "MP initialization failure.\n");
 
 	/* The flash is now no longer cacheable. Reset to WP for performance. */
 	mtrr_use_temp_range(FLASH_BASE_ADDR, CONFIG_ROM_SIZE, MTRR_TYPE_WRPROT);

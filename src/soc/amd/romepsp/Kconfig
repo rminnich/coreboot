@@ -10,6 +10,8 @@ if SOC_AMD_ROMEPSP
 config CPU_SPECIFIC_OPTIONS
 	def_bool y
 	select HAVE_CF9_RESET
+	select PARALLEL_MP
+	select PARALLEL_MP_AP_WORK
 
 
 endmenu

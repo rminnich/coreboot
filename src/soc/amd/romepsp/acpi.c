@@ -38,6 +38,7 @@ unsigned long acpi_fill_mcfg(unsigned long current)
 	return current;
 }
 
+#if 0
 unsigned long acpi_fill_madt(unsigned long current)
 {
 	const struct soc_amd_romepsp_config *cfg = config_of_soc();
@@ -97,6 +98,7 @@ unsigned long acpi_fill_madt(unsigned long current)
 
 	return current;
 }
+#endif
 
 /*
  * Reference section 5.2.9 Fixed ACPI Description Table (FADT)

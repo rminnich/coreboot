@@ -28,7 +28,6 @@ DEVTREE_CONST struct device * DEVTREE_CONST all_devices = &dev_root;
 static DEVTREE_CONST struct device *dev_find_slot(unsigned int bus,
 						unsigned int devfn)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *dev, *result;
 
 	result = 0;
@@ -40,7 +39,6 @@ static DEVTREE_CONST struct device *dev_find_slot(unsigned int bus,
 			break;
 		}
 	}
-	print_func_exit();
 	return result;
 }
 
@@ -55,7 +53,6 @@ DEVTREE_CONST struct device *dev_find_path(
 		DEVTREE_CONST struct device *prev_match,
 		enum device_path_type path_type)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *dev, *result = NULL;
 
 	if (prev_match == NULL)
@@ -69,14 +66,12 @@ DEVTREE_CONST struct device *dev_find_path(
 			break;
 		}
 	}
-	print_func_exit();
 	return result;
 }
 
 DEVTREE_CONST struct device *dev_find_matching_device_on_bus(const struct bus *bus,
 							match_device_fn fn)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *child = NULL;
 
 	while ((child = dev_bus_each_child(bus, child)) != NULL) {
@@ -84,7 +79,6 @@ DEVTREE_CONST struct device *dev_find_matching_device_on_bus(const struct bus *b
 			break;
 	}
 
-	print_func_exit();
 	return child;
 }
 
@@ -97,27 +91,22 @@ DEVTREE_CONST struct device *dev_find_matching_device_on_bus(const struct bus *b
 DEVTREE_CONST struct device *dev_find_next_pci_device(
 		DEVTREE_CONST struct device *previous_dev)
 {
-	print_func_entry();
-	print_func_exit();
 	return dev_find_path(previous_dev, DEVICE_PATH_PCI);
 }
 
 static int path_eq(const struct device_path *path1,
 		const struct device_path *path2)
 {
-	print_func_entry();
 	int equal = 0;
 
 	if (!path1 || !path2) {
 		assert(path1);
 		assert(path2);
 		/* Return 0 in case assert is considered non-fatal. */
-		print_func_exit();
 		return 0;
 	}
 
 	if (path1->type != path2->type) {
-		print_func_exit();
 		return 0;
 	}
 
@@ -179,7 +168,6 @@ static int path_eq(const struct device_path *path1,
 		break;
 	}
 
-	print_func_exit();
 	return equal;
 }
 
@@ -194,13 +182,11 @@ static int path_eq(const struct device_path *path1,
 DEVTREE_CONST struct device *find_dev_path(
 	const struct bus *parent, const struct device_path *path)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *child;
 
 	if (!parent) {
 		assert(0);
 		/* Return NULL in case asserts are considered non-fatal. */
-		print_func_exit();
 		return NULL;
 	}
 
@@ -208,25 +194,21 @@ DEVTREE_CONST struct device *find_dev_path(
 		if (path_eq(path, &child->path))
 			break;
 	}
-	print_func_exit();
 	return child;
 }
 
 DEVTREE_CONST struct device *pcidev_path_behind(
 	const struct bus *parent, pci_devfn_t devfn)
 {
-	print_func_entry();
 	const struct device_path path = {
 		.type = DEVICE_PATH_PCI,
 		.pci.devfn = devfn,
 	};
-	print_func_exit();
 	return find_dev_path(parent, &path);
 }
 
 DEVTREE_CONST struct device *pcidev_path_on_bus(unsigned int bus, pci_devfn_t devfn)
 {
-	print_func_entry();
 	DEVTREE_CONST struct bus *parent = pci_root_bus();
 	DEVTREE_CONST struct device *dev = parent->children;
 
@@ -237,48 +219,38 @@ DEVTREE_CONST struct device *pcidev_path_on_bus(unsigned int bus, pci_devfn_t de
 			continue;
 		}
 		if (dev->bus->secondary == bus) {
-			print_func_exit();
 			return pcidev_path_behind(dev->bus, devfn);
 		}
 		dev = dev->next;
 	}
-	print_func_exit();
 	return NULL;
 }
 
 DEVTREE_CONST struct bus *pci_root_bus(void)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *pci_domain;
 	static DEVTREE_CONST struct bus *pci_root;
 
 	if (pci_root) {
-		print_func_exit();
 		return pci_root;
 	}
 
 	pci_domain = dev_find_path(NULL, DEVICE_PATH_DOMAIN);
 	if (!pci_domain) {
-		print_func_exit();
 		return NULL;
 	}
 
 	pci_root = pci_domain->link_list;
-	print_func_exit();
 	return pci_root;
 }
 
 DEVTREE_CONST struct device *pcidev_path_on_root(pci_devfn_t devfn)
 {
-	print_func_entry();
-	print_func_exit();
 	return pcidev_path_behind(pci_root_bus(), devfn);
 }
 
 DEVTREE_CONST struct device *pcidev_on_root(uint8_t dev, uint8_t fn)
 {
-	print_func_entry();
-	print_func_exit();
 	return pcidev_path_on_root(PCI_DEVFN(dev, fn));
 }
 
@@ -286,46 +258,36 @@ DEVTREE_CONST struct device *pcidev_path_behind_pci2pci_bridge(
 							const struct device *bridge,
 							pci_devfn_t devfn)
 {
-	print_func_entry();
 	if (!bridge || (bridge->path.type != DEVICE_PATH_PCI)) {
 		assert(0);
 		/* Return NULL in case asserts are non-fatal. */
-		print_func_exit();
 		return NULL;
 	}
 
-	print_func_exit();
 	return pcidev_path_behind(bridge->link_list, devfn);
 }
 
 DEVTREE_CONST struct device *pcidev_path_on_root_debug(pci_devfn_t devfn, const char *func)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *dev = pcidev_path_on_root(devfn);
 	if (dev) {
-		print_func_exit();
 		return dev;
 	}
 
 	devtree_bug(func, devfn);
 
 	/* FIXME: This can return wrong device. */
-	print_func_exit();
 	return dev_find_slot(0, devfn);
 }
 
 void devtree_bug(const char *func, pci_devfn_t devfn)
 {
-	print_func_entry();
 	printk(BIOS_ERR, "BUG: %s requests hidden 00:%02x.%u\n", func, devfn >> 3, devfn & 7);
-	print_func_exit();
 }
 
 void __noreturn devtree_die(void)
 {
-	print_func_entry();
 	die("DEVTREE: dev or chip_info is NULL\n");
-	print_func_exit();
 }
 
 /**
@@ -338,7 +300,6 @@ void __noreturn devtree_die(void)
 DEVTREE_CONST struct device *dev_find_slot_on_smbus(unsigned int bus,
 							unsigned int addr)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *dev, *result;
 
 	result = 0;
@@ -350,7 +311,6 @@ DEVTREE_CONST struct device *dev_find_slot_on_smbus(unsigned int bus,
 			break;
 		}
 	}
-	print_func_exit();
 	return result;
 }
 
@@ -363,18 +323,15 @@ DEVTREE_CONST struct device *dev_find_slot_on_smbus(unsigned int bus,
  */
 DEVTREE_CONST struct device *dev_find_slot_pnp(u16 port, u16 device)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *dev;
 
 	for (dev = all_devices; dev; dev = dev->next) {
 		if ((dev->path.type == DEVICE_PATH_PNP) &&
 		    (dev->path.pnp.port == port) &&
 		    (dev->path.pnp.device == device)) {
-			print_func_exit();
 			return dev;
 		}
 	}
-	print_func_exit();
 	return 0;
 }
 
@@ -389,11 +346,9 @@ DEVTREE_CONST struct device *dev_find_slot_pnp(u16 port, u16 device)
 DEVTREE_CONST struct device *dev_bus_each_child(const struct bus *parent,
 					DEVTREE_CONST struct device *prev_child)
 {
-	print_func_entry();
 	DEVTREE_CONST struct device *dev;
 
 	if (parent == NULL) {
-		print_func_exit();
 		return NULL;
 	}
 
@@ -402,6 +357,5 @@ DEVTREE_CONST struct device *dev_bus_each_child(const struct bus *parent,
 	else
 		dev = prev_child->sibling;
 
-	print_func_exit();
 	return dev;
 }

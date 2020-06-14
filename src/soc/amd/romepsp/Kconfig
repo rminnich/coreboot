@@ -19,6 +19,7 @@ config CPU_SPECIFIC_OPTIONS
 	select PARALLEL_MP_AP_WORK
 	select IOAPIC
 	select RTC
+	select TSC_MONOTONIC_TIMER
 
 endmenu
 

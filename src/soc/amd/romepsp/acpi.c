@@ -38,7 +38,6 @@ unsigned long acpi_fill_mcfg(unsigned long current)
 	return current;
 }
 
-#if 0
 unsigned long acpi_fill_madt(unsigned long current)
 {
 	const struct soc_amd_romepsp_config *cfg = config_of_soc();
@@ -74,11 +73,10 @@ unsigned long acpi_fill_madt(unsigned long current)
 	/* 0: PIC 0 */
 	/* 2: APIC 2 */
 	/* 5 mean: 0101 --> Edge-triggered, Active high */
-	current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)
-						current, 0, 0, 2, 0);
-	current += acpi_create_madt_irqoverride(
-		(acpi_madt_irqoverride_t *)current, 0, 9, 9,
-		MP_IRQ_TRIGGER_LEVEL | MP_IRQ_POLARITY_LOW);
+       // current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)current, 0x0, 0x9, 0x00000009, 0x000f);
+       // these two lines match tables on crb.
+	current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *) current, 0, 0, 2, 0);
+	current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)current, 0, 9, 9, MP_IRQ_TRIGGER_LEVEL | MP_IRQ_POLARITY_LOW);
 
 	for (i = 0; i < ARRAY_SIZE(cfg->irq_override); ++i) {
 		irq = cfg->irq_override[i].irq;
@@ -87,18 +85,15 @@ unsigned long acpi_fill_madt(unsigned long current)
 		if (!flags)
 			continue;
 
-		current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)current, 0,
-							irq, irq, flags);
+		current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)current, 0, irq, irq, flags);
 	}
 
 	/* create all subtables for processors */
-	current += acpi_create_madt_lapic_nmi((acpi_madt_lapic_nmi_t *)current,
-			0xff, 5, 1);
+	current += acpi_create_madt_lapic_nmi((acpi_madt_lapic_nmi_t *)current, 0xff, 5, 1);
 	/* 1: LINT1 connect to NMI */
 
 	return current;
 }
-#endif
 
 /*
  * Reference section 5.2.9 Fixed ACPI Description Table (FADT)

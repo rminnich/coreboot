@@ -193,6 +193,8 @@ unsigned long acpi_fill_mcfg(unsigned long current)
 }
 #endif
 
+// bogus
+#if 0
 unsigned long acpi_fill_madt(unsigned long current)
 {
 	/* create all subtables for processors */
@@ -373,7 +375,9 @@ unsigned long acpi_fill_madt(unsigned long current)
 	current += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xae, 0xff);
 	current += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xaf, 0xff);
 	current += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xb0, 0xff);
-	current += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xb1, 0xff);
+	c        current += acpi_create_madt_ioapic((acpi_madt_ioapic_t *)current, 0xf8, 0xb4280000, 0x000000f8);
+        current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)current, 0x0, 0x0, 0x00000002, 0x0000);
+        current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)current, 0x0, 0x9, 0x00000009, 0x000f);urrent += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xb1, 0xff);
 	current += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xb2, 0xff);
 	current += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xb3, 0xff);
 	current += acpi_create_madt_lapic((acpi_madt_lapic_t *)current, 0xb4, 0xff);
@@ -466,3 +470,4 @@ unsigned long acpi_fill_madt(unsigned long current)
 	current += acpi_create_madt_irqoverride((acpi_madt_irqoverride_t *)current, 0x0, 0x9, 0x00000009, 0x000f);
 	return current;
 }
+#endif

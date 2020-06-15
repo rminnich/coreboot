@@ -30,6 +30,11 @@ static const struct _uart_info {
 	} },
 };
 
+void clear_uart_legacy_config(void)
+{
+	write16((void *)FCH_UART_LEGACY_DECODE, 0);
+}
+
 uintptr_t uart_platform_base(int idx)
 {
 	if (idx < 0 || idx > ARRAY_SIZE(uart_info))

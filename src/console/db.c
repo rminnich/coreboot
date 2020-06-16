@@ -14,6 +14,7 @@
 #include <device/device.h>
 #include <device/pci.h>
 #include <device/pci_ids.h>
+#include <device/pci_ops.h>
 #include <device/pcix.h>
 #include <device/pciexp.h>
 
@@ -56,6 +57,57 @@ static void do_rdmsr(int argc, uint64_t *args)
 	printk(BIOS_ERR, "rdmsr %#x:%#x:%#x\r\n", a, msr.hi, msr.lo);
 }
 
+#if ENV_RAMSTAGE
+static int readsnm(uint32_t start, int size, uint32_t *dat)
+{
+	struct device *dev = dev_find_device(0x1022, 0x1480, NULL);
+	if (! dev) {
+		printk(BIOS_ERR, "NO 0x1022 0x1480\n");
+		return - 1;
+	}
+
+	for (int i = 0; i < size; i++) {
+		pci_write_config32(dev, 0xb8, start+i);
+		dat[i] = pci_read_config32(dev, 0xbc);
+	}
+	return size;
+}
+
+static void do_sr(int argc, uint64_t *args)
+{
+	uint32_t dat[1];
+	uint32_t a = (uint32_t) args[0];
+	if (readsnm(a, 1, dat) > 0)
+		printk(BIOS_ERR, "smn read %#x:%#x\r\n", a, dat[0]);
+}
+
+static void do_sw(int argc, uint64_t *args)
+{
+	uint32_t a = (uint32_t) args[0];
+	uint32_t v = (uint32_t) args[1];
+	struct device *dev = dev_find_device(0x1022, 0x1480, NULL);
+	if (! dev) {
+		printk(BIOS_ERR, "NO 0x1022 0x1480\n");
+		return;
+	}
+
+	pci_write_config32(dev, 0xb8, a);
+	pci_write_config32(dev, 0xbc, v);
+	printk(BIOS_ERR, "smn write %#x:%#x\r\n", a, v);
+}
+
+static void do_xs(int argc, uint64_t *args)
+{
+	static uint32_t dat[4096];
+	uint32_t a = (uint32_t)(args[0]);
+	uint32_t s = (uint32_t)(args[1]);
+	if (s > sizeof(dat)/4)
+		s = sizeof(dat) / 4;
+	if (readsnm(a, s, dat) > 0 )
+		hexdump(dat, s);
+}
+
+#endif
 static void do_mem(int argc, uint64_t *args)
 {
 	uint32_t v;
@@ -160,6 +212,11 @@ void db(void)
 	{"mem", "read mem", 1, do_mem,},
 	{"xmem", "x mem", 2, do_xmem,},
 	{"dr", "show drivers", 0, do_drivers,},
+#if ENV_RAMSTAGE
+	{"sr", "smn read", 1, do_sr,},
+	{"sw", "smn_write", 2, do_sw},
+	{"xs", "dump snm", 2, do_xs},
+#endif
 };
 	struct cmd *c;
 	uint8_t b;

@@ -29,6 +29,7 @@ postcar-y += ../../../soc/amd/common/block/spi/fch_spi.c ../../..//soc/amd/picas
 ramstage-y += fw_cfg.c
 ramstage-y += memmap.c
 ramstage-y += ../../../soc/amd/common/block/spi/fch_spi.c ../../..//soc/amd/picasso/config.c ../../..//soc/amd/picasso/gpio.c ../../..//soc/amd/romepsp/i2c.c ../../..//soc/amd/picasso/smi_util.c ../../..//soc/amd/picasso/southbridge.c ../../..//soc/amd/romepsp/uart.c
+ramstage-y += ../../../soc/amd/common/block/smbus/sm.c
 ramstage-y += ../../..//soc/amd/romepsp/acpi.c
 ramstage-y += ../../..//soc/amd/picasso/psp.c
 ramstage-y += ../../..//soc/amd/romepsp/cpu.c

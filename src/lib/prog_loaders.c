@@ -190,6 +190,7 @@ void payload_run(void)
 {
 	struct prog *payload = &global_payload;
 
+	db();
 	/* Reset to booting from this image as late as possible */
 	boot_successful();
 

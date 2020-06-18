@@ -96,6 +96,8 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 //		ram_resource(dev, idx++, 4 * 1024 * 1024, high);
 	if (0)
 	db();
+	// Need to do this to enable ioapic:
+	// >sw 13b102f0 fec00001
 	print_func_exit();
 }
 

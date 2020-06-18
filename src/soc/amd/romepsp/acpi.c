@@ -255,6 +255,11 @@ unsigned long southbridge_write_acpi_tables(const struct device *device,
 		unsigned long current,
 		struct acpi_rsdp *rsdp)
 {
+	printk(BIOS_ERR, "WRITE THAT HPET TABLE\n");
+	printk(BIOS_ERR, "WRITE THAT HPET TABLE\n");
+	printk(BIOS_ERR, "WRITE THAT HPET TABLE\n");
+	printk(BIOS_ERR, "WRITE THAT HPET TABLE\n");
+	printk(BIOS_ERR, "WRITE THAT HPET TABLE\n");
 	return acpi_write_hpet(device, current, rsdp);
 }
 

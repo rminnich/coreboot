@@ -108,6 +108,16 @@ static void do_xs(int argc, uint64_t *args)
 }
 
 #endif
+static void do_wmem(int argc, uint64_t *args)
+{
+	uint32_t *a = (uint32_t*) (uint32_t)(args[0]);
+	uint32_t v = (uint32_t)(args[1]);
+	printk(BIOS_ERR, "mem %p:%#x; ", a, *a);
+	*a = v;
+	printk(BIOS_ERR, ":%#x, n", v);
+	printk(BIOS_ERR, "result is mem %#x\r\n", *a);
+}
+
 static void do_mem(int argc, uint64_t *args)
 {
 	uint32_t v;
@@ -211,6 +221,7 @@ void db(void)
 	{"wmsr", "write an MSR", 2, do_wrmsr,},
 	{"mem", "read mem", 1, do_mem,},
 	{"xmem", "x mem", 2, do_xmem,},
+	{"wmem", "w mem", 2, do_wmem,},
 	{"dr", "show drivers", 0, do_drivers,},
 #if ENV_RAMSTAGE
 	{"sr", "smn read", 1, do_sr,},

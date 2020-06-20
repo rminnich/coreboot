@@ -98,6 +98,31 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 	db();
 	// Need to do this to enable ioapic:
 	// >sw 13b102f0 fec00001
+	// hack.
+	//     wmem fed80300 e3070b77
+	//    wmem fed00010 3
+	uint32_t *v = (void *)0xfed80300;
+	*v = 0xe3070b77;
+	v = (void *)0xfed00010;
+	*v = 3;
+	v = (void *)0xfed00100;
+	*v |= 8;
+	// THis is likely not needed but.
+	v = (void *)0xfed00108;
+	*v = 0x5b03d997;
+
+#if 0
+	rminnich@rminnich-MacBookPro:~/AMD64/coreboot$ cpu r io rl  0xfed00108
+2011/01/20 00:29:52 Mounted /tmp/cpu/lib on /lib
+2011/01/20 00:29:52 Mounted /tmp/cpu/lib64 on /lib64
+2011/01/20 00:29:52 Warning: mounting /tmp/cpu/lib32 on /lib32 failed: no such file or directory
+2011/01/20 00:29:52 Mounted /tmp/cpu/usr on /usr
+2011/01/20 00:29:52 Mounted /tmp/cpu/bin on /bin
+2011/01/20 00:29:52 Mounted /tmp/cpu/etc on /etc
+2011/01/20 00:29:52 Mounted /tmp/cpu/home on /home
+0x5b03d997
+k
+#endif
 	print_func_exit();
 }
 

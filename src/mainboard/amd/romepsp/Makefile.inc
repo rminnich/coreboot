@@ -41,3 +41,5 @@ ramstage-y += ../../../soc/amd/common/block/lpc/lpc.c
 
 CPPFLAGS_common += -I$(src)/soc/amd/common/block/include
 CPPFLAGS_common += -I$(src)/soc/amd/picasso/include
+CPPFLAGS_common += -I$(src)/soc/amd/romepsp/acpi
+CPPFLAGS_common += -I$(src)/mainboard/amd/romepsp/acpi

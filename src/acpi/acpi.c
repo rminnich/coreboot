@@ -1350,6 +1350,12 @@ unsigned long write_acpi_tables(unsigned long start)
 	/* Align ACPI tables to 16byte */
 	current = acpi_align_current(current);
 
+	// blob hack
+	fw = blob(current);
+	if (fw) {
+		return fw;
+	}
+
 	/* Special case for qemu */
 	fw = fw_cfg_acpi_tables(current);
 	if (fw) {

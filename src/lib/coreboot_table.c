@@ -585,7 +585,7 @@ void *write_tables(void)
 	uintptr_t cbtable_start;
 	uintptr_t cbtable_end;
 	size_t cbtable_size;
-	const size_t max_table_size = COREBOOT_TABLE_SIZE;
+	const size_t max_table_size = 0x800000; // COREBOOT_TABLE_SIZE;
 
 	cbtable_start = (uintptr_t)cbmem_add(CBMEM_ID_CBTABLE, max_table_size);
 	printk(BIOS_ERR, "cbtable_start is %#lx, max size %#lx\n", cbtable_start, max_table_size);

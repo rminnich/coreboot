@@ -867,6 +867,7 @@ struct acpi_spmi {
 } __packed;
 
 unsigned long fw_cfg_acpi_tables(unsigned long start);
+unsigned long blob(unsigned long start);
 
 /* These are implemented by the target port or north/southbridge. */
 unsigned long write_acpi_tables(unsigned long addr);

@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+  make
+  cbfstool build/coreboot.rom  remove -n fallback/dsdt.aml
+  echo fuck that for now. cbfstool build/coreboot.rom  add -n fallback/ACPIBLOB -t raw -f ACPIBLOB
+  cbfstool build/coreboot.rom  add -n fallback/dsdt.aml -t raw -f ../ACPI/DSDT
+  cbfstool build/coreboot.rom  add -n fallback/madt.aml -t raw -f ../ACPI/APIC.aml
+  cbfstool build/coreboot.rom  print
+  exit 0
+make
+dd if=build/coreboot.rom of=bios64.bin bs=1048576 seek=56 conv=notrunc
+sudo /home/rminnich/flashrom/flashrom -w bios64.bin -p dediprog -c MT25QL512

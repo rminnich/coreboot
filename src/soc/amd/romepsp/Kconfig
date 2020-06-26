@@ -20,7 +20,30 @@ config CPU_SPECIFIC_OPTIONS
 	select IOAPIC
 	select RTC
 	select TSC_MONOTONIC_TIMER
+	# guesses
+	select SOC_AMD_COMMON_BLOCK_ACPI
+	select SOC_AMD_COMMON_BLOCK_ACPIMMIO
 
-endmenu
+config CPU_ADDR_BITS
+	int
+	default 48
+
+config MMCONF_BASE_ADDRESS
+	hex
+	default 0xF8000000
+
+config MMCONF_BUS_NUMBER
+	int
+	default 64
+
+config ROMEPSP_ACPI_IO_BASE
+	hex
+	default 0x800
+	help
+	  Base address for the ACPI registers.
+
+config ACPI_CPU_STRING
+	string
+	default "\\_PR.C%03d"
 
 endif # SOC_AMD_ROMEPSP

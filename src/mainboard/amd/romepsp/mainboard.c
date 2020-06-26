@@ -8,6 +8,7 @@
 #include <pc80/keyboard.h>
 #include <cpu/cpu.h>
 #include <cpu/x86/msr.h>
+#include <cpu/x86/lapic.h>
 #include <cpu/amd/msr.h>
 #include <cbfs.h>
 
@@ -139,6 +140,7 @@ static void mainboard_amd_romepsp_enable(struct device *dev)
 	// THis is likely not needed but.
 	v = (void *)0xfed00108;
 	*v = 0x5b03d997;
+	do_lapic_init();
 
 #if 0
 	/* rminnich@rminnich-MacBookPro:~/AMD64/coreboot$ cpu r io rl  0xfed00108 */

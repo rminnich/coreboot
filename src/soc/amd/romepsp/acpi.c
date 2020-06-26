@@ -101,7 +101,7 @@ unsigned long acpi_fill_madt(unsigned long current)
  */
 void acpi_fill_fadt(acpi_fadt_t *fadt)
 {
-	printk(BIOS_DEBUG, "pm_base: 0x%04x\n", PICASSO_ACPI_IO_BASE);
+	printk(BIOS_DEBUG, "pm_base: 0x%04x\n", CONFIG_ROMEPSP_ACPI_IO_BASE);
 
 	fadt->sci_int = 9;		/* IRQ 09 - ACPI SCI */
 
@@ -111,6 +111,7 @@ void acpi_fill_fadt(acpi_fadt_t *fadt)
 		fadt->acpi_disable = APM_CNT_ACPI_DISABLE;
 	}
 
+	printk(BIOS_ERR, "1 evet %#x cnt %#x\n", ACPI_PM_EVT_BLK, ACPI_PM1_CNT_BLK);
 	fadt->pm1a_evt_blk = ACPI_PM_EVT_BLK;
 	fadt->pm1b_evt_blk = 0x0000;
 	fadt->pm1a_cnt_blk = ACPI_PM1_CNT_BLK;

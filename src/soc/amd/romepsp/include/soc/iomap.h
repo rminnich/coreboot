@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
-#ifndef __SOC_PICASSO_IOMAP_H__
-#define __SOC_PICASSO_IOMAP_H__
+#ifndef __SOC_ROMEPSP_IOMAP_H__
+#define __SOC_ROMEPSP_IOMAP_H__
 
 /* MMIO Ranges */
 /* IO_APIC_ADDR defined in arch/x86	0xfec00000 */
@@ -58,15 +58,15 @@
 
 /* I/O Ranges */
 #define ACPI_SMI_CTL_PORT		0xb2
-#define PICASSO_ACPI_IO_BASE	CONFIG_PICASSO_ACPI_IO_BASE
-#define  ACPI_PM_EVT_BLK	(PICASSO_ACPI_IO_BASE + 0x00)     /* 4 bytes */
+#define ROMEPSP_ACPI_IO_BASE	CONFIG_ROMEPSP_ACPI_IO_BASE
+#define  ACPI_PM_EVT_BLK	(ROMEPSP_ACPI_IO_BASE + 0x00)     /* 4 bytes */
 #define  ACPI_PM1_STS		(ACPI_PM_EVT_BLK + 0x00)	  /* 2 bytes */
 #define  ACPI_PM1_EN		(ACPI_PM_EVT_BLK + 0x02)	  /* 2 bytes */
-#define  ACPI_PM1_CNT_BLK	(PICASSO_ACPI_IO_BASE + 0x04)     /* 2 bytes */
-#define  ACPI_PM_TMR_BLK	(PICASSO_ACPI_IO_BASE + 0x08)     /* 4 bytes */
-#define  ACPI_CPU_CONTROL	(PICASSO_ACPI_IO_BASE + 0x0c)     /* 6 bytes */
+#define  ACPI_PM1_CNT_BLK	(ROMEPSP_ACPI_IO_BASE + 0x04)     /* 2 bytes */
+#define  ACPI_PM_TMR_BLK	(ROMEPSP_ACPI_IO_BASE + 0x08)     /* 4 bytes */
+#define  ACPI_CPU_CONTROL	(ROMEPSP_ACPI_IO_BASE + 0x0c)     /* 6 bytes */
 /* doc says 0x14 for GPE0_BLK but FT5 only works with 0x20 */
-#define  ACPI_GPE0_BLK		(PICASSO_ACPI_IO_BASE + 0x20)     /* 8 bytes */
+#define  ACPI_GPE0_BLK		(ROMEPSP_ACPI_IO_BASE + 0x20)     /* 8 bytes */
 #define  ACPI_GPE0_STS		(ACPI_GPE0_BLK + 0x00)		  /* 4 bytes */
 #define  ACPI_GPE0_EN		(ACPI_GPE0_BLK + 0x04)		  /* 4 bytes */
 #define NCP_ERR				0xf0
@@ -84,4 +84,4 @@
 #define BIOSRAM_UMA_SIZE		0xf4 /* 4 bytes */
 #define BIOSRAM_UMA_BASE		0xf8 /* 8 bytes */
 
-#endif /* __SOC_PICASSO_IOMAP_H__ */
+#endif /* __SOC_ROMEPSP_IOMAP_H__ */

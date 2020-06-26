@@ -57,6 +57,20 @@ static void do_rdmsr(int argc, uint64_t *args)
 	printk(BIOS_ERR, "rdmsr %#x:%#x:%#x\r\n", a, msr.hi, msr.lo);
 }
 
+static void do_irq(int argc, uint64_t *args)
+{
+	uint32_t a = (uint32_t) args[0];
+	if (a) {
+		printk(BIOS_SPEW, "sti....");
+		__asm__ __volatile__("sti\n");
+		printk(BIOS_SPEW, "\n");
+	} else {
+		printk(BIOS_SPEW, "cli....");
+		__asm__ __volatile__("cli\n");
+		printk(BIOS_SPEW, "\n");
+	}
+}
+
 #if ENV_RAMSTAGE
 static int readsnm(uint32_t start, int size, uint32_t *dat)
 {
@@ -223,6 +237,7 @@ void db(void)
 	{"xmem", "x mem", 2, do_xmem,},
 	{"wmem", "w mem", 2, do_wmem,},
 	{"dr", "show drivers", 0, do_drivers,},
+	{"irq", "enable.disable irq", 1, do_irq,},
 #if ENV_RAMSTAGE
 	{"sr", "smn read", 1, do_sr,},
 	{"sw", "smn_write", 2, do_sw},

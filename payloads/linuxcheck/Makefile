@@ -21,6 +21,8 @@ LPGCC = CC="$(GCC_CC_x86_32)" "$(LIBPAYLOAD_DIR)/bin/lpgcc"
 %.elf: %.c Makefile
 	$(LPGCC) $(CFLAGS) -o $*.elf $*.c \
 		 $(TARGETARCH).c \
+		db.c \
+		x86.S \
 		../libpayload/arch/x86/apic.c
 
 else

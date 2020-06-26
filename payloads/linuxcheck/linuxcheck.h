@@ -21,3 +21,5 @@ void hex16(u16 c);
 void hex32(u32 c);
 
 void timercheck(void);
+
+void db(void);

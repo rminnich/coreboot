@@ -48,6 +48,7 @@ void hex32(u32 c)
 	hex16((u16)c);
 }
 
+void apic_start_delay(unsigned int usec);
 void timercheck(void)
 {
 	printf("no we set up exceptions\n");
@@ -56,7 +57,8 @@ void timercheck(void)
 
 	printf("Enabling interrupts ...\n");
 	enable_interrupts();
-	printf("Sleeping for about one second\n");
-	apic_delay(1000000);
+	//printf("Sleeping for about one second\n");
+	//apic_start_delay(1000000);
+	db();
 	printf("back from sleep, we hope ...\n");
 }

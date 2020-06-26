@@ -19,3 +19,5 @@ void hex4(u8 c);
 void hex8(u8 c);
 void hex16(u16 c);
 void hex32(u32 c);
+
+void timercheck(void);

@@ -14,6 +14,8 @@
 
 #include <libpayload-config.h>
 #include <libpayload.h>
+#include <arch/apic.h>
+#include <exception.h>
 #include "linuxcheck.h"
 
 void buts(char *s)
@@ -44,4 +46,17 @@ void hex32(u32 c)
 {
 	hex16((u16)(c >> 16));
 	hex16((u16)c);
+}
+
+void timercheck(void)
+{
+	printf("no we set up exceptions\n");
+	exception_init();
+	apic_init();
+
+	printf("Enabling interrupts ...\n");
+	enable_interrupts();
+	printf("Sleeping for about one second\n");
+	apic_delay(1000000);
+	printf("back from sleep, we hope ...\n");
 }

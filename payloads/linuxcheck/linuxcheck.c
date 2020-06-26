@@ -45,6 +45,7 @@ int main(void)
 	for (i = 0; i < lib_sysinfo.n_memranges; i++) {
 		printf("%d: base 0x%08llx size 0x%08llx type 0x%x\n", i, lib_sysinfo.memrange[i].base, lib_sysinfo.memrange[i].size, lib_sysinfo.memrange[i].type);
 	}
+	timercheck();
 	buts("Now we will halt. Bye");
 	halt();
 	return 0;

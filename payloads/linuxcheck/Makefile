@@ -4,9 +4,9 @@ XCOMPILE=$(LIBPAYLOAD_DIR)/libpayload.xcompile
 # to avoid pollute the libpayload source directory and possible conflicts
 LPOPTS=obj="$(CURDIR)/build" DESTDIR="$(CURDIR)" DOTCONFIG="$(CURDIR)/.config"
 CFLAGS += -Wall -Wvla -Werror -Os -ffreestanding -nostdinc -nostdlib
-ifeq ($(CONFIG_ARCH_X86),y)
-TARGETARCH = i386
-endif
+
+TARGETARCH ?= i386
+
 
 all: linuxcheck.elf
 
@@ -19,7 +19,10 @@ ifneq ($(strip $(wildcard libpayload)),)
 include $(XCOMPILE)
 LPGCC = CC="$(GCC_CC_x86_32)" "$(LIBPAYLOAD_DIR)/bin/lpgcc"
 %.elf: %.c Makefile
-	$(LPGCC) $(CFLAGS) -o $*.elf $*.c $(TARGETARCH).c
+	$(LPGCC) $(CFLAGS) -o $*.elf $*.c \
+		 $(TARGETARCH).c \
+		../libpayload/arch/x86/apic.c
+
 else
 # If libpayload is not found, first build libpayload,
 # then do the make, this time it'll find libpayload

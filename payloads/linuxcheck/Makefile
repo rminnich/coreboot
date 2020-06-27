@@ -22,6 +22,7 @@ LPGCC = CC="$(GCC_CC_x86_32)" "$(LIBPAYLOAD_DIR)/bin/lpgcc"
 	$(LPGCC) $(CFLAGS) -o $*.elf $*.c \
 		 $(TARGETARCH).c \
 		db.c \
+		serial.c serialice.c \
 		x86.S \
 		../libpayload/arch/x86/apic.c
 

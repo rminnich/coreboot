@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
+//* SPDX-License-Identifier: GPL-2.0-only */
 
 #include <console/console.h>
 #include <console/uart.h>
@@ -24,17 +24,6 @@ struct cmd {
 	int nargs;
 	void (*f)(int nargc, uint64_t *args);
 };
-
-static void do_drivers(int argc, uint64_t *args)
-{
-	struct pci_driver *driver;
-	printk(BIOS_ERR, "There are %ld drivers\n", &_epci_drivers[0] - &_pci_drivers[0]);
-	for (driver = &_pci_drivers[0]; driver != &_epci_drivers[0]; driver++) {
-		printk(BIOS_ERR, "[%04x/%04x] %sops\n",
-		       driver->vendor, driver->device,
-		       (driver->ops->scan_bus ? "bus " : ""));
-		}
-}
 
 static void do_cpuid(int argc, uint64_t *args)
 {
@@ -72,6 +61,17 @@ static void do_irq(int argc, uint64_t *args)
 }
 
 #if ENV_RAMSTAGE
+static void do_drivers(int argc, uint64_t *args)
+{
+	struct pci_driver *driver;
+	printk(BIOS_ERR, "There are %ld drivers\n", &_epci_drivers[0] - &_pci_drivers[0]);
+	for (driver = &_pci_drivers[0]; driver != &_epci_drivers[0]; driver++) {
+		printk(BIOS_ERR, "[%04x/%04x] %sops\n",
+		       driver->vendor, driver->device,
+		       (driver->ops->scan_bus ? "bus " : ""));
+		}
+}
+
 static int readsnm(uint32_t start, int size, uint32_t *dat)
 {
 	struct device *dev = dev_find_device(0x1022, 0x1480, NULL);
@@ -236,9 +236,9 @@ void db(void)
 	{"mem", "read mem", 1, do_mem,},
 	{"xmem", "x mem", 2, do_xmem,},
 	{"wmem", "w mem", 2, do_wmem,},
-	{"dr", "show drivers", 0, do_drivers,},
 	{"irq", "enable.disable irq", 1, do_irq,},
 #if ENV_RAMSTAGE
+	{"dr", "show drivers", 0, do_drivers,},
 	{"sr", "smn read", 1, do_sr,},
 	{"sw", "smn_write", 2, do_sw},
 	{"xs", "dump snm", 2, do_xs},

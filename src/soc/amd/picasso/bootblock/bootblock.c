@@ -124,6 +124,7 @@ void bootblock_soc_init(void)
 {
 	u32 val = cpuid_eax(1);
 	printk(BIOS_DEBUG, "Family_Model: %08x\n", val);
+	db();
 	for(uint8_t i = 0; i<8;i++) {
 	  // fedc_[f000,e000,a000,9000]
 	  uint8_t *cp = (void *)0xfedc9000;

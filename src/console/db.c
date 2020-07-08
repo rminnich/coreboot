@@ -18,6 +18,8 @@
 #include <device/pcix.h>
 #include <device/pciexp.h>
 
+#include "serialice.h"
+
 struct cmd {
 	const char *name;
 	const char *usage;
@@ -237,6 +239,9 @@ void db(void)
 	{"xmem", "x mem", 2, do_xmem,},
 	{"wmem", "w mem", 2, do_wmem,},
 	{"irq", "enable.disable irq", 1, do_irq,},
+#if ENV_BOOTBLOCK
+	{"ice", "serial ice", 0, ice,},
+#endif
 #if ENV_RAMSTAGE
 	{"dr", "show drivers", 0, do_drivers,},
 	{"sr", "smn read", 1, do_sr,},

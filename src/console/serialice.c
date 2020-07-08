@@ -245,9 +245,14 @@ static void serialice_cpuinfo(void)
 
 static void serialice_mainboard(void)
 {
-	sio_putc('\r'); sio_putc('\n');
+	int i;
 
-	sio_putstring("mainboard");
+	sio_putc('\r'); sio_putc('\n');
+	for(i = 0; i < strlen(CONFIG_MAINBOARD_SMBIOS_PRODUCT_NAME); i++)
+		sio_putc(CONFIG_MAINBOARD_SMBIOS_PRODUCT_NAME[i]);
+	for(;i < 33; i++)
+		sio_putc(' ');
+	sio_putc('\r'); sio_putc('\n');
 }
 
 static void serialice_version(void)

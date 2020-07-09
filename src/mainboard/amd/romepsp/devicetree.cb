@@ -147,20 +147,20 @@ chip soc/amd/romepsp
 		device pci 18.6 on  end
 	end # domain
 
-	chip drivers/generic/max98357a
-			register "hid" = ""MX98357A""
-			register "sdmode_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPIO_91)"
-			register "sdmode_delay" = "5"
-			device generic 0.1 on end
-	end
+#	chip drivers/generic/max98357a
+#			register "hid" = ""MX98357A""
+#			register "sdmode_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPIO_91)"
+#			register "sdmode_delay" = "5"
+#			device generic 0.1 on end
+#	end
 
 	device mmio 0xfedc5000 on
-		chip drivers/i2c/tpm
-			register "hid" = ""GOOG0005""
-			register "desc" = ""Cr50 TPM""
-			register "irq_gpio" = "ACPI_GPIO_IRQ_EDGE_LOW(GPIO_3)"
-			device i2c 50 on end
-		end
+#		chip drivers/i2c/tpm
+#			register "hid" = ""GOOG0005""
+#			register "desc" = ""Cr50 TPM""
+#			register "irq_gpio" = "ACPI_GPIO_IRQ_EDGE_LOW(GPIO_3)"
+#			device i2c 50 on end
+#		end
 	end
 
 end	# chip soc/amd/romepsp

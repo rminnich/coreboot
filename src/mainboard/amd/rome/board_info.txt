@@ -1,0 +1,6 @@
+Vendor name: AMD
+Board name: Rome
+Category: eval
+ROM protocol: SPI
+ROM socketed: y
+Flashrom support: y

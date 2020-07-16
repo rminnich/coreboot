@@ -15,8 +15,11 @@
 #include <bootstate.h>
 #include <lib.h>
 #include <dimm_info_util.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <vendorcode/amd/fsp/picasso/dmi_info.h>
+#endif
 
+#ifdef PLATFORM_USES_FSP2_0
 /**
  * Populate dimm_info using AGESA TYPE17_DMI_INFO.
  */
@@ -195,3 +198,4 @@ static void prepare_dmi_17(void *unused)
 
 /* AMD_FSP_DMI_HOB is initialized very late, so check it just in time for writing tables. */
 BOOT_STATE_INIT_ENTRY(BS_WRITE_TABLES, BS_ON_ENTRY, prepare_dmi_17, NULL);
+#endif

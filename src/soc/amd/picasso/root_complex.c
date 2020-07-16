@@ -9,7 +9,9 @@
 #include <device/device.h>
 #include <device/pci.h>
 #include <device/pci_ids.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/util.h>
+#endif
 #include <stdint.h>
 #include <soc/memmap.h>
 
@@ -70,11 +72,17 @@ static void read_resources(struct device *dev)
 {
 	uint32_t mem_usable = (uintptr_t)cbmem_top();
 	unsigned int idx = 0;
-	const struct hob_header *hob = fsp_get_hob_list();
+	const struct hob_header *hob = NULL;
+#ifdef PLATFORM_USES_FSP2_0
 	const struct hob_resource *res;
+#endif
 
 	uintptr_t early_reserved_dram_start, early_reserved_dram_end;
 	const struct memmap_early_dram *e = memmap_get_early_dram_usage();
+
+#ifdef PLATFORM_USES_FSP2_0
+	hob = fsp_get_hob_list();
+#endif
 
 	early_reserved_dram_start = e->base;
 	early_reserved_dram_end = e->base + e->size;
@@ -108,7 +116,7 @@ static void read_resources(struct device *dev)
 				__func__);
 		return;
 	}
-
+#ifdef PLATFORM_USES_FSP2_0
 	for (; hob->type != HOB_TYPE_END_OF_HOB_LIST; hob = fsp_next_hob(hob)) {
 
 		if (hob->type != HOB_TYPE_RESOURCE_DESCRIPTOR)
@@ -129,6 +137,7 @@ static void read_resources(struct device *dev)
 			printk(BIOS_ERR, "Error: failed to set resources for type %d\n",
 					res->type);
 	}
+#endif
 }
 
 /* Used by \_SB.PCI0._CRS */

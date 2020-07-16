@@ -17,10 +17,10 @@ struct amd_fsp_acpi_hob_info {
 	uint16_t hob_payload[0xffc8];
 } __packed;
 
+#ifdef PLATFORM_USES_FSP2_0
 static uintptr_t add_agesa_acpi_table(guid_t guid, const char *name, acpi_rsdp_t *rsdp,
 				      uintptr_t current)
 {
-#ifdef PLATFORM_USES_FSP2_0
 	const struct amd_fsp_acpi_hob_info *data;
 	void *table = (void *)current;
 	size_t hob_size;
@@ -39,10 +39,10 @@ static uintptr_t add_agesa_acpi_table(guid_t guid, const char *name, acpi_rsdp_t
 	current += data->table_size_in_bytes;
 	acpi_add_table(rsdp, table);
 	current = acpi_align_current(current);
-#endif
 	return current;
 }
 
+#endif
 uintptr_t agesa_write_acpi_tables(const struct device *device, uintptr_t current,
 				  acpi_rsdp_t *rsdp)
 {

@@ -4,8 +4,10 @@
 #define __PICASSO_PLATFORM_DESCRIPTORS_H__
 
 #include <types.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <platform_descriptors.h>
 #include <FspsUpd.h>
+#endif
 
 /* These tempory macros apply to emmc0_mode field in FSP_S_CONFIG.
  * TODO: Remove when official definitions arrive. */

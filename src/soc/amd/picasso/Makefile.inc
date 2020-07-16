@@ -73,7 +73,7 @@ ramstage-y += tsc_freq.c
 ramstage-y += finalize.c
 ramstage-y += soc_util.c
 ramstage-y += psp.c
-ramstage-y += fsp_params.c
+ramstage-$(PLATFORM_USES_FSP2_0) += fsp_params.c
 ramstage-y += config.c
 ramstage-y += update_microcode.c
 ramstage-y += graphics.c
@@ -96,6 +96,9 @@ smm-y += config.c
 CPPFLAGS_common += -I$(src)/soc/amd/picasso
 CPPFLAGS_common += -I$(src)/soc/amd/picasso/include
 CPPFLAGS_common += -I$(src)/soc/amd/picasso/acpi
+
+ifeq ($(CONFIG_USE_BLOBS),y)
+
 CPPFLAGS_common += -I$(src)/vendorcode/amd/fsp/picasso
 
 MAINBOARD_BLOBS_DIR:=$(top)/3rdparty/blobs/mainboard/$(MAINBOARDDIR)
@@ -483,24 +486,26 @@ $(obj)/amdfw_b.rom: $(obj)/amdfw.rom
 		--anywhere \
 		--output $@
 
-cbfs-files-y += apu/amdfw
+cbfs-files-$(CONFIG_USE_BLOBS) += apu/amdfw
 apu/amdfw-file := $(obj)/amdfw.rom
 apu/amdfw-position := $(PICASSO_FWM_POSITION)
 apu/amdfw-type := raw
 
 ifeq ($(CONFIG_VBOOT_SLOTS_RW_AB)$(CONFIG_VBOOT_STARTS_BEFORE_BOOTBLOCK),yy)
-cbfs-files-y += apu/amdfw_a
+cbfs-files-$(CONFIG_USE_BLOBS) += apu/amdfw_a
 apu/amdfw_a-file := $(obj)/amdfw_a.rom
 apu/amdfw_a-position := $(call strip_quotes, $(CONFIG_PICASSO_FW_A_POSITION))
 apu/amdfw_a-type := raw
 
-cbfs-files-y += apu/amdfw_b
+cbfs-files-$(CONFIG_USE_BLOBS) += apu/amdfw_b
 apu/amdfw_b-file := $(obj)/amdfw_b.rom
 apu/amdfw_b-position := $(call strip_quotes, $(CONFIG_PICASSO_FW_B_POSITION))
 apu/amdfw_b-type := raw
 endif
 
 $(call strip_quotes,$(CONFIG_FSP_M_CBFS))-options := -b $(CONFIG_FSP_M_ADDR)
+
+endif # ($(CONFIG_USE_BLOBS),y)
 
 cpu_microcode_bins += $(wildcard 3rdparty/amd_blobs/picasso/PSP/UcodePatch_*.bin)
 

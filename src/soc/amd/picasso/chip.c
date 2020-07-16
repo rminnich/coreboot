@@ -11,7 +11,9 @@
 #include <soc/pci_devs.h>
 #include <soc/southbridge.h>
 #include "chip.h"
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/api.h>
+#endif
 
 /* Supplied by i2c.c */
 extern struct device_operations picasso_i2c_mmio_ops;

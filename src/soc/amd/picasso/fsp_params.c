@@ -2,8 +2,10 @@
 
 #include <device/pci.h>
 #include <soc/pci_devs.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <soc/platform_descriptors.h>
 #include <fsp/api.h>
+#endif
 #include "chip.h"
 
 static void fsps_update_emmc_config(FSP_S_CONFIG *scfg,

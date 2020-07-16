@@ -10,8 +10,10 @@
 #include <cpu/amd/msr.h>
 #include <arch/bert_storage.h>
 #include <memrange.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/util.h>
 #include <FspGuids.h>
+#endif
 #include <soc/memmap.h>
 
 /*
@@ -40,12 +42,14 @@ void smm_region(uintptr_t *start, size_t *size)
 {
 	static int once;
 	struct range_entry tseg;
-	int status;
+	int status = -1;
 
 	*start = 0;
 	*size = 0;
 
+#ifdef PLATFORM_USES_FSP2_0
 	status = fsp_find_range_hob(&tseg, AMD_FSP_TSEG_HOB_GUID.b);
+#endif
 
 	if (status < 0) {
 		printk(BIOS_ERR, "Error: unable to find TSEG HOB\n");
@@ -64,12 +68,14 @@ void smm_region(uintptr_t *start, size_t *size)
 void bert_reserved_region(void **start, size_t *size)
 {
 	struct range_entry bert;
-	int status;
+	int status = -1;
 
 	*start = NULL;
 	*size = 0;
 
+#ifdef PLATFORM_USES_FSP2_0
 	status = fsp_find_range_hob(&bert, AMD_FSP_BERT_HOB_GUID.b);
+#endif
 
 	if (status < 0) {
 		printk(BIOS_ERR, "Error: unable to find BERT HOB\n");

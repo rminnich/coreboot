@@ -2,8 +2,10 @@
 
 #include <acpi/acpi.h>
 #include <console/console.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/util.h>
 #include <FspGuids.h>
+#endif
 #include <soc/acpi.h>
 #include <stdint.h>
 
@@ -18,9 +20,11 @@ struct amd_fsp_acpi_hob_info {
 static uintptr_t add_agesa_acpi_table(guid_t guid, const char *name, acpi_rsdp_t *rsdp,
 				      uintptr_t current)
 {
+#ifdef PLATFORM_USES_FSP2_0
 	const struct amd_fsp_acpi_hob_info *data;
 	void *table = (void *)current;
 	size_t hob_size;
+
 
 	data = fsp_find_extension_hob_by_guid(guid.b, &hob_size);
 	if (!data) {
@@ -35,13 +39,14 @@ static uintptr_t add_agesa_acpi_table(guid_t guid, const char *name, acpi_rsdp_t
 	current += data->table_size_in_bytes;
 	acpi_add_table(rsdp, table);
 	current = acpi_align_current(current);
-
+#endif
 	return current;
 }
 
 uintptr_t agesa_write_acpi_tables(const struct device *device, uintptr_t current,
 				  acpi_rsdp_t *rsdp)
 {
+#ifdef PLATFORM_USES_FSP2_0
 	printk(BIOS_DEBUG, "Searching for AGESA FSP ACPI Tables\n");
 
 	current = add_agesa_acpi_table(AMD_FSP_ACPI_SSDT_HOB_GUID, "SSDT", rsdp, current);
@@ -50,6 +55,6 @@ uintptr_t agesa_write_acpi_tables(const struct device *device, uintptr_t current
 	current = add_agesa_acpi_table(AMD_FSP_ACPI_IVRS_HOB_GUID, "IVRS", rsdp, current);
 
 	/* Add SRAT, MSCT, SLIT if needed in the future */
-
+#endif
 	return current;
 }

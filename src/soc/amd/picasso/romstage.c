@@ -14,7 +14,9 @@
 #include <soc/mrc_cache.h>
 #include <types.h>
 #include "chip.h"
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/api.h>
+
 
 void platform_fsp_memory_init_params_cb(FSPM_UPD *mupd, uint32_t version)
 {
@@ -65,6 +67,8 @@ void platform_fsp_memory_init_params_cb(FSPM_UPD *mupd, uint32_t version)
 	mcfg->telemetry_vddcr_soc_offset = config->telemetry_vddcr_soc_offset;
 }
 
+#endif
+
 asmlinkage void car_stage_entry(void)
 {
 	int s3_resume;
@@ -80,8 +84,10 @@ asmlinkage void car_stage_entry(void)
 	printk(BIOS_DEBUG, "Family_Model: %08x\n", val);
 
 	post_code(0x43);
+#ifdef PLATFORM_USES_FSP2_0
 	fsp_memory_init(s3_resume);
 	soc_update_mrc_cache();
+#endif
 
 	memmap_stash_early_dram_usage();
 

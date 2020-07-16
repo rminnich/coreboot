@@ -4,7 +4,9 @@
  * This code was adapted from src/soc/amd/common/block/pi/amd_late_init.c
  */
 
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/util.h>
+#endif
 #include <memory_info.h>
 #include <console/console.h>
 #include <cbmem.h>

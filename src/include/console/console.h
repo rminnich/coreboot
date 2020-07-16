@@ -76,4 +76,6 @@ int do_printk(int msg_level, const char *fmt, ...)
 
 int do_vprintk(int msg_level, const char *fmt, va_list args);
 
+void ice(void);
+
 #endif /* CONSOLE_CONSOLE_H_ */

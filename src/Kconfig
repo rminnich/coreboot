@@ -1103,6 +1103,16 @@ config EM100
 	  mainboard code supports this. On supported Intel platforms this works
 	  by changing the settings in the descriptor.bin file.
 
+config SERIALICE
+	bool "SerialICE"
+	default n
+	depends on CONSOLE_SERIAL
+	help
+	  Enable SerialICE on the serial console.
+	  SerialICE pauses with a prompt, and one can attach
+	  to that prompt with any number of tools, including
+	  a modified QEMU. For more, see serialice.org
+
 endmenu
 
 

@@ -46,14 +46,5 @@ DefinitionBlock (
 
 	/* Thermal handler */
 	//	#include <acpi/thermal.asl>
-
-	/* Chrome OS Embedded Controller */
-	Scope (\_SB.PCI0.LPCB)
-	{
-		/* ACPI code for EC SuperIO functions */
-		#include <ec/google/chromeec/acpi/superio.asl>
-		/* ACPI code for EC functions */
-		#include <ec/google/chromeec/acpi/ec.asl>
-	}
 }
 /* End of ASL file */

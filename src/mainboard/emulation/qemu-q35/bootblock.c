@@ -51,4 +51,5 @@ void bootblock_soc_init(void)
 {
 	bootblock_northbridge_init();
 	bootblock_southbridge_init();
+	ice();
 }

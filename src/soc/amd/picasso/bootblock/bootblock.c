@@ -20,6 +20,7 @@
 #include <2struct.h>
 #endif
 
+#include <arch/io.h>
 asmlinkage void bootblock_resume_entry(void);
 
 /* PSP performs the memory training and setting up DRAM map prior to x86 cores
@@ -35,11 +36,16 @@ static void set_caching(void)
 	msr_t fixed_mtrr_mmio;
 	struct var_mtrr_context mtrr_ctx;
 
+	outb(0xbe, 0x80);
 	var_mtrr_context_init(&mtrr_ctx, NULL);
+	outb(0xbf, 0x80);
 	top_mem = rdmsr(TOP_MEM);
+	outb(0xc0, 0x80);
 	/* Enable RdDram and WrDram attributes in fixed MTRRs. */
 	sys_cfg = rdmsr(SYSCFG_MSR);
+	outb(0xc1, 0x80);
 	sys_cfg.lo |= SYSCFG_MSR_MtrrFixDramModEn;
+	outb(0xc2, 0x80);
 
 	/* Fixed MTRR constants. */
 	fixed_mtrr_ram.lo = fixed_mtrr_ram.hi =
@@ -60,13 +66,17 @@ static void set_caching(void)
 	mtrr_def_type.lo |= MTRR_DEF_TYPE_EN | MTRR_DEF_TYPE_FIX_EN;
 
 	disable_cache();
+	outb(0xc3, 0x80);
 
 	wrmsr(SYSCFG_MSR, sys_cfg);
+	outb(0xc4, 0x80);
 
 	clear_all_var_mtrr();
+	outb(0xc5, 0x80);
 
 	var_mtrr_set(&mtrr_ctx, 0, ALIGN_DOWN(top_mem.lo, 8*MiB), MTRR_TYPE_WRBACK);
 	var_mtrr_set(&mtrr_ctx, FLASH_BASE_ADDR, CONFIG_ROM_SIZE, MTRR_TYPE_WRPROT);
+	outb(0xc6, 0x80);
 
 	/* Set up RAM caching for everything below 1MiB except for 0xa0000-0xc0000 . */
 	wrmsr(MTRR_FIX_64K_00000, fixed_mtrr_ram);
@@ -81,7 +91,9 @@ static void set_caching(void)
 	wrmsr(MTRR_FIX_4K_F0000, fixed_mtrr_ram);
 	wrmsr(MTRR_FIX_4K_F8000, fixed_mtrr_ram);
 
+	outb(0xc7, 0x80);
 	wrmsr(MTRR_DEF_TYPE_MSR, mtrr_def_type);
+	outb(0xc9, 0x80);
 
 	/* Enable Fixed and Variable MTRRs. */
 	sys_cfg.lo |= SYSCFG_MSR_MtrrFixDramEn | SYSCFG_MSR_MtrrVarDramEn;
@@ -89,8 +101,10 @@ static void set_caching(void)
 	/* AGESA currently expects SYSCFG_MSR_MtrrFixDramModEn to be set. Once
 	   MP init happens in coreboot proper it can be knocked down. */
 	wrmsr(SYSCFG_MSR, sys_cfg);
+	outb(0xca, 0x80);
 
 	enable_cache();
+	outb(0xcb, 0x80);
 }
 
 static void write_resume_eip(void)
@@ -112,16 +126,25 @@ static void write_resume_eip(void)
 
 asmlinkage void bootblock_c_entry(uint64_t base_timestamp)
 {
+	outb(0xaa, 0x80);
+	outb(0xa3, 0x80);
 	set_caching();
-	write_resume_eip();
+	outb(0xa4, 0x80);
+	if (0) write_resume_eip();
+	outb(0xa5, 0x80);
 	enable_pci_mmconf();
+	outb(0xa6, 0x80);
 
 	bootblock_main_with_basetime(base_timestamp);
+	outb(0xa7, 0x80);
+	while (1);
 }
 
 void bootblock_soc_early_init(void)
 {
+	outb(0xa8, 0x80);
 	fch_pre_init();
+	outb(0xa9, 0x80);
 }
 
 void bootblock_soc_init(void)

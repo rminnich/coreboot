@@ -21,6 +21,7 @@ bootblock_resume_entry:
 
 .global bootblock_pre_c_entry
 bootblock_pre_c_entry:
+1:
 	post_code(0xa0)
 
 	/* Clear .bss section */
@@ -33,6 +34,7 @@ bootblock_pre_c_entry:
 	rep	stosl
 
 	movl	$_eearlyram_stack, %esp
+	movl	$0x10000, %esp
 
 	/* Align the stack and keep aligned for call to bootblock_c_entry() */
 	and	$0xfffffff0, %esp

@@ -37,6 +37,10 @@
 .type _start16bit, @function
 
 _start16bit:
+1:
+	movb $0xee, %al
+	outb %al, $0x80
+	//jmp 1b
 	cli
 	/* Save the BIST result */
 	movl	%eax, %ebp
@@ -120,6 +124,10 @@ _start16bit:
 	/* Restore BIST to %eax */
 	movl	%ebp, %eax
 
+//1:
+	//movb $0xef, %al
+	//outb %al, $0x80
+	//jmp 1b
 	/* Now that we are in protected mode jump to a 32 bit code segment. */
 	ljmpl	$ROM_CODE_SEG, $__protected_start
 

@@ -362,7 +362,11 @@ static void lpc_enable_controller(void)
 
 void lpc_early_init(void)
 {
+	outb(0x80, 0x80);
 	lpc_enable_controller();
+	outb(0x81, 0x80);
 	lpc_disable_decodes();
+	outb(0x82, 0x80);
 	lpc_set_spibase(SPI_BASE_ADDRESS);
+	outb(0x83, 0x80);
 }

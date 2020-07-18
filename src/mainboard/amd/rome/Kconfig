@@ -18,6 +18,8 @@ config BOARD_SPECIFIC_OPTIONS
 	select PCIEXP_CLK_PM
 	select PCIEXP_COMMON_CLOCK
 	select PCIEXP_L1_SUB_STATE
+#	select PICASSO_UART_1_8MZ
+#	select PICASSO_UART_LEGACY
 
 config ELOG_BOOT_COUNT_CMOS_OFFSET
 	int
@@ -158,5 +160,9 @@ config VBOOT_STARTS_IN_BOOTBLOCK
 	  Firmware verification happens during the end of or right after the
 	  bootblock. This implies that a static VBOOT2_WORK() buffer must be
 	  allocated in memlayout.
+
+config DCACHE_BSP_STACK_SIZE
+	hex
+	default 0x1000
 
 endif # BOARD_AMD_ROME

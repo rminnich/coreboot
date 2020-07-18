@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 bootblock-y += bootblock.c
+bootblock-y += symhacks.S
 
 #romstage-y += chromeos.c
 #romstage-y += sku_id.c
+romstage-y += symhacks.S
 
 #ramstage-y += chromeos.c
 #ramstage-y += ec.c

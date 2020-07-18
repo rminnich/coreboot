@@ -33,6 +33,10 @@ _start:
 	ljmp	$ROM_CODE_SEG, $__protected_start
 
 __protected_start:
+	1:
+	movb $0xf0, %al
+	outb %al, $0x80
+	//jmp 1b
 	/* Save the BIST value */
 	movl	%eax, %ebp
 
@@ -49,3 +53,6 @@ __protected_start:
 
 	/* Restore the BIST value to %eax */
 	movl	%ebp, %eax
+	1:
+	movb $0xf1, %al
+	outb %al, $0x80

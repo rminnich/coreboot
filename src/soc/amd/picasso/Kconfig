@@ -61,7 +61,8 @@ config CPU_SPECIFIC_OPTIONS
 
 config MEMLAYOUT_LD_FILE
 	string
-	default "src/soc/amd/picasso/memlayout.ld"
+	default "src/soc/amd/picasso/memlayout.ld" if PLATFORM_USES_FSP2_0
+	default "src/arch/x86/memlayout.ld"
 
 config EARLY_RESERVED_DRAM_BASE
 	hex
@@ -113,7 +114,8 @@ config PRERAM_CBMEM_CONSOLE_SIZE
 
 config BOOTBLOCK_ADDR
 	hex
-	default 0x2030000
+	default 0x2030000 if PLATFORM_USES_FSP2_0
+	default 0xffff0000
 	help
 	  Sets the address in DRAM where bootblock should be loaded.
 
@@ -128,7 +130,8 @@ config C_ENV_BOOTBLOCK_SIZE
 config X86_RESET_VECTOR
 	hex
 	depends on ARCH_X86
-	default 0x203fff0
+	default 0x203fff0 if PLATFORM_USES_FSP2_0
+	default 0xfffffff0
 	help
 	  Sets the reset vector within bootblock where x86 starts execution.
 	  Reset vector is supposed to live at offset -0x10 from end of

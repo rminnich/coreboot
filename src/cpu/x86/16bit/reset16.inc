@@ -4,6 +4,10 @@
 	.code16
 .globl	_start
 _start:
+1:
+	movb $0xdd, %al
+	outb %al, $0x80
+//	jmp 1b
 	.byte  0xe9
 	.int   _start16bit - ( . + 2 )
 	/* Note: The above jump is hand coded to work around bugs in binutils.

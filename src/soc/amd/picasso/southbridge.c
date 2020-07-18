@@ -135,18 +135,28 @@ static void lpc_configure_decodes(void)
 /* Before console init */
 void fch_pre_init(void)
 {
+	outb(0x90, 0x80);
 	lpc_early_init();
+	outb(0x91, 0x80);
 
-	if (!CONFIG(SOC_AMD_COMMON_BLOCK_USE_ESPI))
+	//if (!CONFIG(SOC_AMD_COMMON_BLOCK_USE_ESPI))
 		lpc_configure_decodes();
+	outb(0x92, 0x80);
 
 	fch_spi_early_init();
+	outb(0x93, 0x80);
 	enable_acpimmio_decode_pm04();
+	outb(0x94, 0x80);
 	fch_smbus_init();
+	outb(0x95, 0x80);
 	sb_enable_cf9_io();
+	outb(0x96, 0x80);
 	sb_enable_legacy_io();
+	outb(0x97, 0x80);
 	enable_aoac_devices();
-	sb_reset_i2c_slaves();
+	outb(0x99, 0x80);
+	//sb_reset_i2c_slaves();
+	outb(0x9a, 0x80);
 
 	/*
 	 * On reset Range_0 defaults to enabled. We want to start with a clean
@@ -154,8 +164,11 @@ void fch_pre_init(void)
 	 */
 	clear_uart_legacy_config();
 
+	outb(0x9b, 0x80);
 	if (CONFIG(PICASSO_CONSOLE_UART))
 		set_uart_config(CONFIG_UART_FOR_CONSOLE);
+	outb(0x9c, 0x80);
+	//outb('0', 0x3f8);
 }
 
 static void print_num_status_bits(int num_bits, uint32_t status,

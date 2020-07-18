@@ -2,6 +2,7 @@
 
 #include <bootblock_common.h>
 #include <arch/io.h>
+#include <console/uart.h>
 /*
 #include <baseboard/variants.h>
 */
@@ -12,7 +13,7 @@ void bootblock_mainboard_early_init(void)
 		for(int j = 0; j < 100000000; j++)
 			;
 		outb(i, 0x80);
-		//outb('0', 0x3f8);
+		uart_tx_byte(0, '0');
 	}
 	/*
 	size_t num_gpios;

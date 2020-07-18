@@ -139,7 +139,7 @@ void fch_pre_init(void)
 	lpc_early_init();
 	outb(0x91, 0x80);
 
-	//if (!CONFIG(SOC_AMD_COMMON_BLOCK_USE_ESPI))
+	if (!CONFIG(SOC_AMD_COMMON_BLOCK_USE_ESPI))
 		lpc_configure_decodes();
 	outb(0x92, 0x80);
 

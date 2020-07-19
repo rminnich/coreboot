@@ -162,13 +162,14 @@ void fch_pre_init(void)
 	 * On reset Range_0 defaults to enabled. We want to start with a clean
 	 * slate to not have things unexpectedly enabled.
 	 */
-	clear_uart_legacy_config();
+	if (0)clear_uart_legacy_config();
 
 	outb(0x9b, 0x80);
 	if (CONFIG(PICASSO_CONSOLE_UART))
 		set_uart_config(CONFIG_UART_FOR_CONSOLE);
+	{uint8_t *cp = (void *)0xfedc9000; for(int i = 0; i < 256; i++) *cp = '1';}
+	outb('0', 0x3f8);
 	outb(0x9c, 0x80);
-	//outb('0', 0x3f8);
 }
 
 static void print_num_status_bits(int num_bits, uint32_t status,

@@ -139,13 +139,15 @@ config X86_RESET_VECTOR
 
 config ROMSTAGE_ADDR
 	hex
-	default 0x2040000
+	default 0x2040000 if PLATFORM_USES_FSP2_0
+	default 0xff880000
 	help
 	  Sets the address in DRAM where romstage should be loaded.
 
 config ROMSTAGE_SIZE
 	hex
-	default 0x80000
+	default 0x80000 if PLATFORM_USES_FSP2_0
+	default 0x70000
 	help
 	  Sets the size of DRAM allocation for romstage in linker script.
 
@@ -180,7 +182,8 @@ config VERSTAGE_SIZE
 
 config RAMBASE
 	hex
-	default 0x10000000
+	default 0x10000000 if PLATFORM_USES_FSP2_0
+	default 0x10000
 
 config CPU_ADDR_BITS
 	int

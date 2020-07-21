@@ -76,7 +76,7 @@ static uint32_t get_internal_silicon_type(void)
 	}
 
 	silicon_type = hob->silicon_id;
-#ifdef PLATFORM_USES_FSP2_0
+#endif
 
 	printk(BIOS_DEBUG, "Silicon ID = 0x%x\n", silicon_type);
 

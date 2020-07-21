@@ -95,9 +95,9 @@ static void enable_dev(struct device *dev)
 
 static void soc_init(void *chip_info)
 {
+#ifdef PLATFORM_USES_FSP2_0
 	default_dev_ops_root.write_acpi_tables = agesa_write_acpi_tables;
 
-#ifdef PLATFORM_USES_FSP2_0
 	fsp_silicon_init(acpi_is_wakeup_s3());
 #endif
 

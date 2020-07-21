@@ -15,7 +15,9 @@
 #include <bootstate.h>
 #include <lib.h>
 #include <dimm_info_util.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <vendorcode/amd/fsp/picasso/dmi_info.h>
+#endif
 
 #ifdef PLATFORM_USES_FSP2_0
 /**

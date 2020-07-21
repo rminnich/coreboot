@@ -72,15 +72,14 @@ static void read_resources(struct device *dev)
 {
 	uint32_t mem_usable = (uintptr_t)cbmem_top();
 	unsigned int idx = 0;
-	const struct hob_header *hob = NULL; fsp_get_hob_list();
+#ifdef PLATFORM_USES_FSP2_0
+	const struct hob_header *hob = fsp_get_hob_list();
 	const struct hob_resource *res;
+#endif
 
 	uintptr_t early_reserved_dram_start, early_reserved_dram_end;
 	const struct memmap_early_dram *e = memmap_get_early_dram_usage();
 
-#ifdef PLATFORM_USES_FSP2_0
-	hob = fsp_get_hob_list();
-#endif
 	early_reserved_dram_start = e->base;
 	early_reserved_dram_end = e->base + e->size;
 
@@ -108,6 +107,7 @@ static void read_resources(struct device *dev)
 
 	mmconf_resource(dev, MMIO_CONF_BASE);
 
+#ifdef PLATFORM_USES_FSP2_0
 	if (!hob) {
 		printk(BIOS_ERR, "Error: %s incomplete because no HOB list was found\n",
 				__func__);

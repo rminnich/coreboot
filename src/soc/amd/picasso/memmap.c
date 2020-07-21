@@ -68,12 +68,14 @@ void smm_region(uintptr_t *start, size_t *size)
 void bert_reserved_region(void **start, size_t *size)
 {
 	struct range_entry bert;
-	int status;
+	int status = -1;
 
 	*start = NULL;
 	*size = 0;
 
+#ifdef PLATFORM_USES_FSP2_0
 	status = fsp_find_range_hob(&bert, AMD_FSP_BERT_HOB_GUID.b);
+#endif
 
 	if (status < 0) {
 		printk(BIOS_ERR, "Error: unable to find BERT HOB\n");

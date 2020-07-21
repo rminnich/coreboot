@@ -9,7 +9,9 @@
 #include <device/device.h>
 #include <device/pci.h>
 #include <device/pci_ids.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/util.h>
+#endif
 #include <stdint.h>
 #include <soc/memmap.h>
 
@@ -70,12 +72,15 @@ static void read_resources(struct device *dev)
 {
 	uint32_t mem_usable = (uintptr_t)cbmem_top();
 	unsigned int idx = 0;
-	const struct hob_header *hob = fsp_get_hob_list();
+	const struct hob_header *hob = NULL; fsp_get_hob_list();
 	const struct hob_resource *res;
 
 	uintptr_t early_reserved_dram_start, early_reserved_dram_end;
 	const struct memmap_early_dram *e = memmap_get_early_dram_usage();
 
+#ifdef PLATFORM_USES_FSP2_0
+	hob = fsp_get_hob_list();
+#endif
 	early_reserved_dram_start = e->base;
 	early_reserved_dram_end = e->base + e->size;
 
@@ -127,8 +132,9 @@ static void read_resources(struct device *dev)
 			reserved_ram_resource(dev, idx++, res->addr / KiB, res->length / KiB);
 		else
 			printk(BIOS_ERR, "Error: failed to set resources for type %d\n",
-					res->type);
+			       res->type);
 	}
+#endif
 }
 
 /* Used by \_SB.PCI0._CRS */

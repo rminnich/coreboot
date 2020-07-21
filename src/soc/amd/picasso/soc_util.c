@@ -2,9 +2,11 @@
 
 #include <arch/cpu.h>
 #include <console/console.h>
+#ifdef TYPE17_DMI_INFO
 #include <FspGuids.h>
 #include <fsp/util.h>
 #include <misc_data.h>
+#endif
 #include <soc/cpu.h>
 #include <soc/soc_util.h>
 #include <types.h>
@@ -53,6 +55,8 @@ void print_socket_type(void)
 static uint32_t get_internal_silicon_type(void)
 {
 	static uint32_t silicon_type;
+
+#ifdef PLATFORM_USES_FSP2_0
 	size_t hob_size = 0;
 	const struct picasso_misc_data *hob;
 
@@ -72,6 +76,7 @@ static uint32_t get_internal_silicon_type(void)
 	}
 
 	silicon_type = hob->silicon_id;
+#ifdef PLATFORM_USES_FSP2_0
 
 	printk(BIOS_DEBUG, "Silicon ID = 0x%x\n", silicon_type);
 

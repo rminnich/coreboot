@@ -8,7 +8,9 @@
 #include <soc/southbridge.h>
 #include <amdblocks/acpimmio.h>
 #include <amdblocks/reset.h>
+#ifdef PLATFORM_USES_FSP2_0
 #include <fsp/util.h>
+#endif
 #include <assert.h>
 
 void set_warm_reset_flag(void)
